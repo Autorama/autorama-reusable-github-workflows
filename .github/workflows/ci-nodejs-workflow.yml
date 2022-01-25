@@ -20,20 +20,7 @@ on:
         required: true
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    env:
-      NODE_ENV: "test"
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '14.17.0'
-          architecture: 'x64'
-      - run: | 
-          yarn install --immutable
-          yarn lint
-  unit-test:
+  ci:
     runs-on: ubuntu-latest
     env:
       # this makes the babel-jest-react magic happen and means all tests pass. If this is set to 
@@ -55,5 +42,6 @@ jobs:
           architecture: 'x64'
       - run: |
           source ./setup.sh ${{ inputs.env }} ${{ inputs.stack }} ${{ inputs.app }} ${{ inputs.ecr_region }}
-          yarn install --immutable
-          yarn test --coverage --maxWorkers=2
+          yarn install
+          yarn lint
+          yarn test
