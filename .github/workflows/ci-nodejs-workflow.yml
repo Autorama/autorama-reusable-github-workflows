@@ -1,5 +1,8 @@
 name: ci-workflow
 
+env:
+  BUILD_ENV_EXEC_S3_PATH: https://build-env-var.s3.eu-west-2.amazonaws.com/build-env-var.linux-amd64
+
 on:
   workflow_call:
     inputs:
@@ -40,8 +43,12 @@ jobs:
         with:
           node-version: '14.17.0'
           architecture: 'x64'
+      - name: Curl build-env-var
+        run: |
+          curl ${{ env.BUILD_ENV_EXEC_S3_PATH }} --output build-env-var.linux-amd64
+          chmod +x build-env-var.linux-amd64
       - run: |
-          source ./setup.sh ${{ inputs.env }} ${{ inputs.stack }} ${{ inputs.app }} ${{ inputs.ecr_region }}
+          eval "$(./build-env-var.linux-amd64 -ignoreMissing -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envTemplate=env.template -envStdout)"
           yarn install
           yarn lint
           yarn test
