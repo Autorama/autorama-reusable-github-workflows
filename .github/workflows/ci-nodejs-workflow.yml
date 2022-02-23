@@ -49,6 +49,7 @@ jobs:
           chmod +x build-env-var.linux-amd64
       - run: |
           eval "$(./build-env-var.linux-amd64 -ignoreMissing -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envTemplate=env.template -envStdout)"
+          export NODE_ENV='development'
           yarn install
           yarn lint
           yarn test
