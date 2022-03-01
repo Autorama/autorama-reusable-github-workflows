@@ -18,6 +18,10 @@ on:
       ecr_region:
         type: string
         required: true
+      run_yarn_lint:
+        type: boolean
+        required: false
+        default: true
     secrets:
       aws_actions_role:
         required: true
@@ -51,5 +55,9 @@ jobs:
           eval "$(./build-env-var.linux-amd64 -ignoreMissing -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envTemplate=env.template -envStdout)"
           export NODE_ENV='development'
           yarn install
-          yarn lint
+          
+          if [[ "${{inputs.run_yarn_lint }}" == "true" ]]; then
+            yarn lint
+          fi
+          
           yarn test
