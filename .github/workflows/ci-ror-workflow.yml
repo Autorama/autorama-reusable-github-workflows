@@ -25,7 +25,7 @@ jobs:
         uses: mikepenz/action-junit-report@v2
         with:
           report_paths: '**/results.xml'
-      - run:
+      - run: |
           cp coverage/.resultset.json .resultset.json
           cp coverage/coverage.json coverage.json
       - name: Cache unit-test artefacts
