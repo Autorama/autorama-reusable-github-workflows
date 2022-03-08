@@ -25,16 +25,16 @@ jobs:
         uses: mikepenz/action-junit-report@v2
         with:
           report_paths: '**/results.xml'
-      - run: |
-          cp coverage/.resultset.json .resultset.json
-          cp coverage/coverage.json coverage.json
+      - name: collect unit-test artefacts
+        run: |
+          mkdir unit-test-artefacts
+          cp coverage/.resultset.json unit-test-artefacts/.resultset.json
+          cp coverage/coverage.json unit-test-artefacts/coverage.json
+          cp results.xml unit-test-artefacts/results.xml
 
-          ls -lah
+          ls -lah unit-test-artefacts
       - name: Cache unit-test artefacts
         uses: actions/cache@v2
         with:
-          path: |
-            results.xml
-            coverage.json
-            .resultset.json
+          path: unit-test-artefacts
           key: unit-test-artefacts-${{ github.run_number }}
