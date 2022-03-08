@@ -21,3 +21,5 @@ jobs:
             -e HOME=/tmp -e RAILS_ENV=test web \
             bundle exec rspec --format RspecJunitFormatter --out results.xml \
             --format progress --format documentation
+
+          ls -lah coverage
