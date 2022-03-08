@@ -28,6 +28,8 @@ jobs:
       - run: |
           cp coverage/.resultset.json .resultset.json
           cp coverage/coverage.json coverage.json
+
+          ls -lah
       - name: Cache unit-test artefacts
         uses: actions/cache@v2
         with:
