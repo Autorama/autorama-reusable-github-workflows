@@ -3,9 +3,9 @@ name: ci-sonarcloud-scan
 on:
   workflow_call:
     secrets:
-      github_token:
+      grid_github_token:
         required: true
-      sonar_token:
+      grid_sonar_token:
         required: true
 
 jobs:
@@ -27,5 +27,5 @@ jobs:
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.github_token }}
-          SONAR_TOKEN: ${{ secrets.sonar_token }}
+          GITHUB_TOKEN: ${{ secrets.grid_github_token }}
+          SONAR_TOKEN: ${{ secrets.grid_sonar_token }}
