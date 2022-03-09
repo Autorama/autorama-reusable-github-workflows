@@ -1,0 +1,27 @@
+name: ci-sonarcloud-scan
+
+on:
+  workflow_call:
+    secrets:
+      grid_github_token:
+        required: true
+      grid_sonar_token:
+        required: true
+
+jobs:
+  sonarcloud-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Cache unit-test coverage
+        uses: actions/cache@v2
+        with:
+          path: coverage
+          key: unit-test-coverage-${{ github.run_number }}
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.grid_github_token }}
+          SONAR_TOKEN: ${{ secrets.grid_sonar_token }}

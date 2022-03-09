@@ -61,3 +61,8 @@ jobs:
           fi
           
           yarn test
+      - name: Cache unit-test coverage
+        uses: actions/cache@v2
+        with:
+          path: coverage
+          key: unit-test-coverage-${{ github.run_number }}
