@@ -1,0 +1,26 @@
+name: ci-sonarcloud-scan
+
+on:
+  workflow_call:
+
+jobs:
+  sonarcloud-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Cache unit-test artefacts
+        uses: actions/cache@v2
+        with:
+          path: unit-test-artefacts
+          key: unit-test-artefacts-${{ github.run_number }}
+      - run: |
+          cp unit-test-artefacts/.resultset.json .resultset.json
+          cp unit-test-artefacts/coverage.json coverage.json
+          cp unit-test-artefacts/results.xml results.xml
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GRID_GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.GRID_SONAR_CLOUD_TOKEN }}
