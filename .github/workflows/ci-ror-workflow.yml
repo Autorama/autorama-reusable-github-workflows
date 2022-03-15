@@ -8,6 +8,11 @@ on:
         type: string
         default: 'dev'
         required: true
+      skip_artefact_caching:
+        description: 'set to true if there are no unit-test artefacts'
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   unit-test:
@@ -26,6 +31,7 @@ jobs:
         with:
           report_paths: '**/results.xml'
       - name: collect unit-test artefacts
+        if: ${{ inputs.skip_artefact_caching != true }}
         run: |
           mkdir unit-test-artefacts
           cp coverage/.resultset.json unit-test-artefacts/.resultset.json
@@ -34,6 +40,7 @@ jobs:
 
           ls -lah unit-test-artefacts
       - name: Cache unit-test artefacts
+        if: ${{ inputs.skip_artefact_caching != true }}
         uses: actions/cache@v2
         with:
           path: unit-test-artefacts
