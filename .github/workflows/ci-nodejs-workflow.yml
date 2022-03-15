@@ -22,6 +22,11 @@ on:
         type: boolean
         required: false
         default: true
+      skip_artefact_caching:
+        description: 'set to true if there are no unit-test artefacts'
+        type: boolean
+        required: false
+        default: false
     secrets:
       aws_actions_role:
         required: true
@@ -62,6 +67,7 @@ jobs:
           
           yarn test
       - name: Cache unit-test coverage
+        if: ${{ inputs.skip_artefact_caching != true }}
         uses: actions/cache@v2
         with:
           path: coverage
