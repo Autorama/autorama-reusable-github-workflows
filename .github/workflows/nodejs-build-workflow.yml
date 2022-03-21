@@ -1,0 +1,85 @@
+name: nodejs-build
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        type: string
+        required: true
+      app:
+        type: string
+        required: true
+      stack:
+        type: string
+        required: true
+      ecr_region:
+        type: string
+        required: true
+      build_env_exec_s3_path:
+        type: string
+        required: true
+      tag:
+        type: string
+        required: true
+      github_sha:
+        type: string
+        required: true
+
+jobs:
+  set-env:
+    runs-on: ubuntu-latest
+    outputs:
+      github_actions_role_secret: ${{ steps.variables.outputs.github_actions_role_secret }}
+    steps:
+      - id: variables
+        run: |
+          env_upper=$(echo ${{ github.event.inputs.env }} | tr '[:lower:]' '[:upper:]')
+          env_upper=${env_upper//-/_}
+          github_actions_role_secret="GRID_${env_upper}_GHA_ACTION_ROLE"
+          echo "::set-output name=github_actions_role_secret::${github_actions_role_secret}"
+
+  package:
+    runs-on: ubuntu-latest
+    needs: [init, set-env]
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.github_sha }}
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{  github.event.inputs.ecr_region }}
+          role-to-assume: ${{ secrets[needs.set-env.outputs.github_actions_role_secret] }}
+      - name: Curl build-env-var
+        run: |
+          curl ${{ github.event.inputs.build_env_exec_s3_path }} --output build-env-var.linux-amd64
+          chmod +x build-env-var.linux-amd64
+      - uses: aws-actions/amazon-ecr-login@v1
+      - name: Pull latest develop image for cache
+        run: docker pull ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ env.APP }}:latest || true
+      - name: Docker build
+        run: |
+          ARTEFACT_TAG=${{ github.event.inputs.tag }}
+          eval "$(./build-env-var.linux-amd64 -ignoreMissing -ssmPrefix=/${{ github.event.inputs.env }}/${{ github.event.inputs.stack }}/${{ github.event.inputs.app }} -envTemplate=env.template -envStdout)"
+          docker build -t ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:${{ github.event.inputs.tag }} \
+          --build-arg NPM_TOKEN=${{ secrets.GRID_NPM_TOKEN }} \
+          --build-arg PRERENDER_SERVICE_URL=${PRERENDER_SERVICE_URL} \
+          --build-arg API_KEY=${API_KEY} \
+          --build-arg API_URL=${API_URL} \
+          --build-arg ENV=${ENV} \
+          --build-arg GTM_ID=${GTM_ID} \
+          --build-arg HEAP_ID=${HEAP_ID} \
+          --build-arg MICROBLINK_URL=${MICROBLINK_URL} \
+          --build-arg IMG_OPTIMISATION_HOST=${IMG_OPTIMISATION_HOST} \
+          --build-arg LOQATE_KEY=${LOQATE_KEY} \
+          --build-arg NODE_ENV=${NODE_ENV} \
+          --build-arg HOST_DOMAIN=${HOST_DOMAIN} \
+          --build-arg SEO_BUCKET_NAME=${SEO_BUCKET_NAME} \
+          --cache-from ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:latest .
+      - name: Docker push
+        run: |
+          ARTEFACT_TAG=${{ steps.create-tag.outputs.tag }}
+          docker push ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:${{ github.event.inputs.tag }}
+          echo "Pushed image ${{ github.event.inputs.tag }}"
