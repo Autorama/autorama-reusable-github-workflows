@@ -30,13 +30,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       github_actions_role_secret: ${{ steps.variables.outputs.github_actions_role_secret }}
+      github_short_sha: ${{ steps.variables.outputs.github_short_sha }}
     steps:
       - id: variables
         run: |
           env_upper=$(echo ${{ github.event.inputs.env }} | tr '[:lower:]' '[:upper:]')
           env_upper=${env_upper//-/_}
           github_actions_role_secret="GRID_${env_upper}_GHA_ACTION_ROLE"
+          github_short_sha=${echo ${{ github.event.inputs.tag }} | sed -e 's/[a-z]\+-//g'}
           echo "::set-output name=github_actions_role_secret::${github_actions_role_secret}"
+          echo "::set-output name=github_short_sha::${github_short_sha}"
 
   package:
     runs-on: ubuntu-latest
@@ -47,7 +50,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.inputs.github_sha }}
+          ref: ${{ needs.set-env.outputs.github_short_sha }}
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ${{  github.event.inputs.ecr_region }}
