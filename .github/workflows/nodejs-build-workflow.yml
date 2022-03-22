@@ -21,9 +21,6 @@ on:
       tag:
         type: string
         required: true
-      github_sha:
-        type: string
-        required: true
 
 jobs:
   set-env:
