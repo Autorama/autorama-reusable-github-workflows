@@ -63,7 +63,7 @@ jobs:
         run: |
           ARTEFACT_TAG=${{ github.event.inputs.tag }}
           eval "$(./build-env-var.linux-amd64 -ignoreMissing -ssmPrefix=/${{ github.event.inputs.env }}/${{ github.event.inputs.stack }}/${{ github.event.inputs.app }} -envTemplate=env.template -envStdout)"
-          docker build -t ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:${{ github.event.inputs.tag }} \
+          docker build -t ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:${ARTEFACT_TAG} \
           --build-arg NPM_TOKEN=${{ secrets.GRID_NPM_TOKEN }} \
           --build-arg PRERENDER_SERVICE_URL=${PRERENDER_SERVICE_URL} \
           --build-arg API_KEY=${API_KEY} \
@@ -80,6 +80,6 @@ jobs:
           --cache-from ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:latest .
       - name: Docker push
         run: |
-          ARTEFACT_TAG=${{ steps.create-tag.outputs.tag }}
-          docker push ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:${{ github.event.inputs.tag }}
-          echo "Pushed image ${{ github.event.inputs.tag }}"
+          ARTEFACT_TAG=${{ github.event.inputs.tag }}
+          docker push ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:${ARTEFACT_TAG}
+          echo "Pushed image ${ARTEFACT_TAG}"
