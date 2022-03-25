@@ -61,7 +61,7 @@ jobs:
       
       - uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-region: ${{ env.ECR_REGION }}
+          aws-region: ${{ github.event.inputs.ecr_region }}
           role-to-assume: ${{ secrets.GRID_UAT_GHA_ACTION_ROLE }}
       - uses: aws-actions/amazon-ecr-login@v1
       - name: Pull latest develop image for cache
@@ -71,7 +71,7 @@ jobs:
       
       - uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-region: ${{ env.ECR_REGION }}
+          aws-region: ${{ github.event.inputs.ecr_region }}
           role-to-assume: ${{ secrets[needs.set-env.outputs.github_actions_role_secret] }}
       - name: Curl build-env-var
         run: |
@@ -91,7 +91,7 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-region: ${{ env.ECR_REGION }}
+          aws-region: ${{ github.event.inputs.ecr_region }}
           role-to-assume: ${{ secrets.GRID_UAT_GHA_ACTION_ROLE }}
       - uses: aws-actions/amazon-ecr-login@v1
       - name: Docker push
