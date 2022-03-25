@@ -78,21 +78,8 @@ jobs:
       - name: Docker build
         run: |
           ARTEFACT_TAG=${{ github.event.inputs.tag }}
-          eval "$(./build-env-var.linux-amd64 -ignoreMissing -ssmPrefix=/${{ github.event.inputs.env }}/${{ github.event.inputs.stack }}/${{ github.event.inputs.app }} -envTemplate=env.template -envStdout)"
+          ./build-env-var.linux-amd64 -ssmPrefix=/${{ github.event.inputs.env }}/${{ github.event.inputs.stack }}/${{ github.event.inputs.app }} -envFile=.env.ci
           docker build -t ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:${ARTEFACT_TAG} \
-          --build-arg NPM_TOKEN=${{ secrets.GRID_NPM_TOKEN }} \
-          --build-arg PRERENDER_SERVICE_URL=${PRERENDER_SERVICE_URL} \
-          --build-arg API_KEY=${API_KEY} \
-          --build-arg API_URL=${API_URL} \
-          --build-arg ENV=${ENV} \
-          --build-arg GTM_ID=${GTM_ID} \
-          --build-arg HEAP_ID=${HEAP_ID} \
-          --build-arg MICROBLINK_URL=${MICROBLINK_URL} \
-          --build-arg IMG_OPTIMISATION_HOST=${IMG_OPTIMISATION_HOST} \
-          --build-arg LOQATE_KEY=${LOQATE_KEY} \
-          --build-arg NODE_ENV=${NODE_ENV} \
-          --build-arg HOST_DOMAIN=${HOST_DOMAIN} \
-          --build-arg SEO_BUCKET_NAME=${SEO_BUCKET_NAME} \
           --cache-from ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:latest .
 
       # setup aws credentials for uat to push ecr image
