@@ -38,6 +38,8 @@ jobs:
           ref: ${{ github.event.inputs.github_sha }}
       - id: variables
         run: |
+          echo ${{ github.event.inputs.ecr_region }}
+
           env_upper=$(echo ${{ github.event.inputs.env }} | tr '[:lower:]' '[:upper:]')
           env_upper=${env_upper//-/_}
           github_actions_role_secret="GRID_${env_upper}_GHA_ACTION_ROLE"
@@ -61,7 +63,7 @@ jobs:
       
       - uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-region: ${{ github.event.inputs.ecr_region }}
+          aws-region: eu-west-2
           role-to-assume: ${{ secrets.GRID_UAT_GHA_ACTION_ROLE }}
       - uses: aws-actions/amazon-ecr-login@v1
       - name: Pull latest develop image for cache
