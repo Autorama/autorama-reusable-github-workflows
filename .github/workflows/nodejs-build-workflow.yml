@@ -41,7 +41,8 @@ jobs:
           env_upper=$(echo ${{ github.event.inputs.env }} | tr '[:lower:]' '[:upper:]')
           env_upper=${env_upper//-/_}
           github_actions_role_secret="GRID_${env_upper}_GHA_ACTION_ROLE"
-          github_short_sha=$(git rev-parse --short "${{ github.event.inputs.github_sha }}")
+          github_sha=${{ github.event.inputs.github_sha }}
+          github_short_sha=${github_sha:0:7}
           echo "::set-output name=github_actions_role_secret::${github_actions_role_secret}"
           echo "::set-output name=github_short_sha::${github_short_sha}"
 
