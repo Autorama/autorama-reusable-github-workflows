@@ -32,6 +32,10 @@ jobs:
       github_actions_role_secret: ${{ steps.variables.outputs.github_actions_role_secret }}
       github_short_sha: ${{ steps.variables.outputs.github_short_sha }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.github_sha }}
       - id: variables
         run: |
           env_upper=$(echo ${{ github.event.inputs.env }} | tr '[:lower:]' '[:upper:]')
