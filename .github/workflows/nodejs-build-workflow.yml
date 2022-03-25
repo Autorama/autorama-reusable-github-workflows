@@ -35,15 +35,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.inputs.github_sha }}
+          ref: ${{ inputs.github_sha }}
       - id: variables
         run: |
-          echo ${{ github.event.inputs.ecr_region }}
-
-          env_upper=$(echo ${{ github.event.inputs.env }} | tr '[:lower:]' '[:upper:]')
+          env_upper=$(echo ${{ inputs.env }} | tr '[:lower:]' '[:upper:]')
           env_upper=${env_upper//-/_}
           github_actions_role_secret="GRID_${env_upper}_GHA_ACTION_ROLE"
-          github_sha=${{ github.event.inputs.github_sha }}
+          github_sha=${{ inputs.github_sha }}
           github_short_sha=${github_sha:0:7}
           echo "::set-output name=github_actions_role_secret::${github_actions_role_secret}"
           echo "::set-output name=github_short_sha::${github_short_sha}"
@@ -63,7 +61,7 @@ jobs:
       
       - uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-region: eu-west-2
+          aws-region: ${{ inputs.ecr_region }}
           role-to-assume: ${{ secrets.GRID_UAT_GHA_ACTION_ROLE }}
       - uses: aws-actions/amazon-ecr-login@v1
       - name: Pull latest develop image for cache
@@ -73,31 +71,31 @@ jobs:
       
       - uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-region: ${{ github.event.inputs.ecr_region }}
+          aws-region: ${{ inputs.ecr_region }}
           role-to-assume: ${{ secrets[needs.set-env.outputs.github_actions_role_secret] }}
       - name: Curl build-env-var
         run: |
-          curl ${{ github.event.inputs.build_env_exec_s3_path }} --output build-env-var.linux-amd64
+          curl ${{ inputs.build_env_exec_s3_path }} --output build-env-var.linux-amd64
           chmod +x build-env-var.linux-amd64
       - uses: aws-actions/amazon-ecr-login@v1
       - name: Pull latest develop image for cache
         run: docker pull ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ env.APP }}:latest || true
       - name: Docker build
         run: |
-          ARTEFACT_TAG=${{ github.event.inputs.tag }}
-          ./build-env-var.linux-amd64 -ssmPrefix=/${{ github.event.inputs.env }}/${{ github.event.inputs.stack }}/${{ github.event.inputs.app }} -envFile=.env.ci
-          docker build -t ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:${ARTEFACT_TAG} \
-          --cache-from ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:latest .
+          ARTEFACT_TAG=${{ inputs.tag }}
+          ./build-env-var.linux-amd64 -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envFile=.env.ci
+          docker build -t ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ inputs.app }}:${ARTEFACT_TAG} \
+          --cache-from ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ inputs.app }}:latest .
 
       # setup aws credentials for uat to push ecr image
 
       - uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-region: ${{ github.event.inputs.ecr_region }}
+          aws-region: ${{ inputs.ecr_region }}
           role-to-assume: ${{ secrets.GRID_UAT_GHA_ACTION_ROLE }}
       - uses: aws-actions/amazon-ecr-login@v1
       - name: Docker push
         run: |
-          ARTEFACT_TAG=${{ github.event.inputs.tag }}
-          docker push ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ github.event.inputs.app }}:${ARTEFACT_TAG}
+          ARTEFACT_TAG=${{ inputs.tag }}
+          docker push ${{ secrets.GRID_PROD_REPO_PREFIX }}/${{ inputs.app }}:${ARTEFACT_TAG}
           echo "Pushed image ${ARTEFACT_TAG}"
