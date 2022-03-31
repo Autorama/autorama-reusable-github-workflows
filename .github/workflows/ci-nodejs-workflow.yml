@@ -61,10 +61,9 @@ jobs:
       - run: |
           eval "$(./build-env-var.linux-amd64 -ignoreMissing -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envTemplate=env.template -envStdout)"
           
-          # check if file exist
-
           dot_env_file_api_url="https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{ inputs.app }}/.env.${{ inputs.env }}?ref=feature/env-files-dir"
 
+          # check if file exist
           HTTP_STATUS=$(curl -I \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.grid_git_token }}" \
