@@ -67,18 +67,16 @@ jobs:
             -H "Authorization: token ${{ secrets.grid_git_token }}" \
             https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{ inputs.app }}/.env.${{ inputs.env }}?ref=feature/env-files-dir \
             | jq -r ".content" | base64 --decode > .env
-
-          cat .env
           
-          # source .env
+          source .env
           
-          # yarn install
+          yarn install
           
-          # if [[ "${{inputs.run_yarn_lint }}" == "true" ]]; then
-          #   yarn lint
-          # fi
+          if [[ "${{inputs.run_yarn_lint }}" == "true" ]]; then
+            yarn lint
+          fi
           
-          # yarn test
+          yarn test
       - name: Cache unit-test coverage
         if: ${{ inputs.skip_artefact_caching != true }}
         uses: actions/cache@v2
