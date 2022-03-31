@@ -31,7 +31,7 @@ on:
       aws_actions_role:
         required: true
       grid_git_token:
-        required: true
+        required: false
 
 jobs:
   ci:
