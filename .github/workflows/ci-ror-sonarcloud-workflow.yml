@@ -30,7 +30,7 @@ jobs:
           bundler-cache: false
       - name: create result file
         run: |
-            bundle install --without development test --deployment
+            bundle install
             bundle exec rspec --format RspecJunitFormatter --out results.xml --format progress --format documentation
             cp coverage/.resultset.json .resultset.json
             cp coverage/coverage.json coverage.json
