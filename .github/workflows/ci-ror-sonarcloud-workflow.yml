@@ -24,7 +24,11 @@ jobs:
       #     cp unit-test-artefacts/.resultset.json .resultset.json
       #     cp unit-test-artefacts/coverage.json coverage.json
       #     cp unit-test-artefacts/results.xml results.xml
-      - name: create result
+      - uses: ruby/setup-ruby@v1
+        with:
+        ruby-version: 2.6
+        bundler-cache: true
+      - name: create result file
         run: |
             bundle intsall --without development test --deployment
             bundle exec rspec --format RspecJunitFormatter --out results.xml --format progress --format documentation
