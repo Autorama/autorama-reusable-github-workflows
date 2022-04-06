@@ -33,3 +33,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.grid_github_token }}
           SONAR_TOKEN: ${{ secrets.grid_sonar_token }}
+      - name: Run tmate
+        uses: mxschmitt/action-tmate@v2
