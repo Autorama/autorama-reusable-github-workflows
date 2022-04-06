@@ -26,8 +26,8 @@ jobs:
       #     cp unit-test-artefacts/results.xml results.xml
       - uses: ruby/setup-ruby@v1
         with:
-        ruby-version: 2.6
-        bundler-cache: true
+          ruby-version: 2.6
+          bundler-cache: true
       - name: create result file
         run: |
             bundle intsall --without development test --deployment
