@@ -26,6 +26,7 @@ jobs:
           cp unit-test-artefacts/.resultset.json .resultset.json
           cp unit-test-artefacts/coverage.json coverage.json
           cp unit-test-artefacts/results.xml results.xml
+          cat /app/services/graphql/queries/cap/technical_specifications.rb
           ls -ah && pwd
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
