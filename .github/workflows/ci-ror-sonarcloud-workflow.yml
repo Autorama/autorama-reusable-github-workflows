@@ -21,7 +21,7 @@ jobs:
           path: unit-test-artefacts
           key: unit-test-artefacts-${{ github.run_number }}
       - run: |
-          cat unit-test-artefacts/coverage.json | sed -e "s;/app/app/;app/;g" | tee unit-test-artefacts/coverage.json
+          cat unit-test-artefacts/coverage.json | sed -e "s;/app/app/;/work/Vehicles/Vehicles/app/;g" | tee unit-test-artefacts/coverage.json
           cat unit-test-artefacts/.resultset.json | sed -e "s;/app/app/;app/;g" | tee unit-test-artefacts/.resultset.json
           cp unit-test-artefacts/.resultset.json .resultset.json
           cp unit-test-artefacts/coverage.json coverage.json
@@ -33,5 +33,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.grid_github_token }}
           SONAR_TOKEN: ${{ secrets.grid_sonar_token }}
-      - name: Run tmate
-        uses: mxschmitt/action-tmate@v2
