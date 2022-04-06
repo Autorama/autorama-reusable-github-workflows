@@ -23,7 +23,7 @@ jobs:
         run: |
           docker-compose -f docker-compose.ci.yml -p 123 build web
           docker-compose -f docker-compose.ci.yml -p 123 run -u $(id -u) \
-            -e HOME=/tmp -e RAILS_ENV=test web \
+            -e HOME=/tmp -e RAILS_ROOT=/ RAILS_ENV=test web \
             bundle exec rspec --format RspecJunitFormatter --out results.xml \
             --format progress --format documentation
       - name: Publish Test Report
