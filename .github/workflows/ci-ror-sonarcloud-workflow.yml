@@ -28,7 +28,7 @@ jobs:
       - name: fix code coverage paths
         run: |
             cat coverage.json
-            cat coverage.json | sed -e "s;/app/app/;app/;g" | tee unit-test-artefacts/coverage.json
+            cat coverage.json | sed -e "s;/app/app/;app/;g" | tee coverage.json
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
