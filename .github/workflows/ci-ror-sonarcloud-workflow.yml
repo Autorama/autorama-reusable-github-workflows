@@ -30,6 +30,16 @@ jobs:
           ls -ah && pwd
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
+        with:
+          args: >
+            -Dsonar.projectKey=Autorama_Vehicles
+            -Dsonar.organization=autorama
+            -Dsonar.projectName=Vehicles
+            -Dsonar.projectVersion=1.0-SNAPSHOT
+            -Dsonar.sources=app,config,db,lib
+            -Dsonar.exclusions=app/assets/**/*
+            -Dsonar.ruby.coverage.reportPaths=coverage.json
         env:
           GITHUB_TOKEN: ${{ secrets.grid_github_token }}
           SONAR_TOKEN: ${{ secrets.grid_sonar_token }}
+        
