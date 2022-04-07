@@ -21,16 +21,14 @@ jobs:
           path: unit-test-artefacts
           key: unit-test-artefacts-${{ github.run_number }}
       - run: |
-          # cat unit-test-artefacts/coverage.json | sed -e "s;/app/app/;app/;g" | tee unit-test-artefacts/coverage.json
-          # cat unit-test-artefacts/.resultset.json | sed -e "s;/app/app/;app/;g" | tee unit-test-artefacts/.resultset.json
           cp unit-test-artefacts/.resultset.json .resultset.json
           cp unit-test-artefacts/coverage.json coverage.json
           cp unit-test-artefacts/results.xml results.xml
           ls -ah && pwd
       - name: fix code coverage paths
-        working-directory: /home/runner/work/Vehicles/Vehicles
         run: |
-          sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.json
+            cat coverage.json
+            cat coverage.json | sed -e "s;/app/app/;app/;g" | tee unit-test-artefacts/coverage.json
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
