@@ -24,11 +24,11 @@ jobs:
           cp unit-test-artefacts/.resultset.json .resultset.json
           cp unit-test-artefacts/coverage.json coverage.json
           cp unit-test-artefacts/results.xml results.xml
-          ls -ah && pwd
       - name: fix code coverage paths
         run: |
             cat coverage.json
             cat coverage.json | sed -e "s;/app/app/;app/;g" | tee coverage.json
+            ls -ah && pwd
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
