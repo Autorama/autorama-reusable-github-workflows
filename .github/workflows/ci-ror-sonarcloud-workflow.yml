@@ -35,4 +35,4 @@ jobs:
       - run: | 
           cat coverage.json
           ls
-          pws       
+          pwd      
