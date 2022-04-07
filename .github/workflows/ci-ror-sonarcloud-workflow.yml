@@ -28,9 +28,9 @@ jobs:
           cp unit-test-artefacts/results.xml results.xml
           ls -ah && pwd
       - name: fix code coverage paths
-        working-directory: ./
+        working-directory: /home/runner/work/Vehicles/Vehicles
         run: |
-          sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' .coverage.json
+          sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.json
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
