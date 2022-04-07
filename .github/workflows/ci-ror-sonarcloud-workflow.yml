@@ -27,7 +27,7 @@ jobs:
           cp unit-test-artefacts/coverage.json coverage.json
           cp unit-test-artefacts/results.xml results.xml
           ls -ah && pwd
-      name: fix code coverage paths
+      - name: fix code coverage paths
         working-directory: ./
         run: |
           sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' .coverage.json
