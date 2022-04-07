@@ -32,7 +32,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.grid_github_token }}
           SONAR_TOKEN: ${{ secrets.grid_sonar_token }}
-        run: | 
+      - run: | 
           cat coverage.json
           ls
           pws       
