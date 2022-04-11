@@ -25,8 +25,9 @@ jobs:
           cp unit-test-artefacts/coverage.json coverage.json
           cp unit-test-artefacts/results.xml results.xml
       - name: fix code coverage paths
-        run: |
-            cat coverage.json | sed -e "s;/app/app/;app/;g" | tee coverage.json
+        run: sed -i 's@'/app/app/'@/github/workspace/app/@g' .coverage.json
+        # run: |
+        #     cat coverage.json | sed -e "s;/app/app/;/github/workspace/app;g" | tee coverage.json
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
