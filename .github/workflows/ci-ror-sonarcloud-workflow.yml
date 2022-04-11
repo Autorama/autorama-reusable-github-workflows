@@ -30,4 +30,4 @@ jobs:
         uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.grid_github_token }}
-          SONAR_TOKEN: ${{ secrets.grid_sonar_token }}    
+          SONAR_TOKEN: ${{ secrets.grid_sonar_token }}
