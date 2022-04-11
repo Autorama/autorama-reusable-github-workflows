@@ -26,14 +26,8 @@ jobs:
           cp unit-test-artefacts/results.xml results.xml
       - name: fix code coverage paths
         run: sed -i 's@'/app/app/'@/github/workspace/app/@g' coverage.json
-        # run: |
-        #     cat coverage.json | sed -e "s;/app/app/;/github/workspace/app;g" | tee coverage.json
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.grid_github_token }}
-          SONAR_TOKEN: ${{ secrets.grid_sonar_token }}
-      - run: | 
-          cat coverage.json
-          ls
-          pwd      
+          SONAR_TOKEN: ${{ secrets.grid_sonar_token }}    
