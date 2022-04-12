@@ -5,7 +5,7 @@ on:
       env:
         type: string
         required: true
-      Test-pack-tag:
+      test-pack-tag:
         type: string
         required: true
 jobs:
