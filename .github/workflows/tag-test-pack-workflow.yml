@@ -5,5 +5,12 @@ on:
       env:
         type: string
         required: true
-      # Test-pack-tag:
-      #   type:
+      Test-pack-tag:
+        type: string
+        required: true
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: echo hello world
