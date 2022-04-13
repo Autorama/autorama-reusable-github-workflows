@@ -5,12 +5,18 @@ on:
       watchman_repo:
         type: string
         required: true
+        description: watchman repository follwing the format - {org}/{repo}
       env:
         type: string
         required: true
+        description: environment. eg. dev|uat|pre-prod|prod
       test-pack-tag:
         type: string
         required: true
+        description: test packs tag json
+    secrets:
+      grid_git_grid_token:
+      required: true
         
 jobs:
   run-test-pack:
@@ -19,21 +25,21 @@ jobs:
     strategy:
       matrix:
         value:
-          - ${{ fromJson(github.event.inputs.test_packs) }}
+          - ${{ fromJson(inputs.test_packs) }}
     steps:
-      - uses: ruby/setup-ruby@v1 # https://github.com/ruby/setup-ruby
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.6.5
       - run: |
           # checkout watchman repo using git
-          git clone https://${{ secrets.GRID_GIT_TOKEN }}@github.com/Autorama/watchman.git 
+          git clone https://${{ secrets.grid_git_grid_token }}@github.com/${{ inputs.watchman_repo }}.git
           cd watchman/features
           BUNDLE_GEMFILE="${{ github.workspace }}/watchman/Gemfile"
           bundle install
           echo "here's the matrix value"
           echo ${{ matrix.value.test_pack }}
-          bundle exec cucumber ./${{ matrix.value.test_pack }} ENVIRONMENT=${{ env.env }} BROWSER=headless --format json --out=cucumber-report.json -q -f pretty
+          bundle exec cucumber ./${{ matrix.value.test_pack }} ENVIRONMENT=${{ inputs.env }} BROWSER=headless --format json --out=cucumber-report.json -q -f pretty
       - uses: deblockt/cucumber-report-annotations-action@v1.7
         with:
-          access-token: ${{ secrets.GRID_GIT_TOKEN }}
+          access-token: ${{ secrets.grid_git_grid_token }}
           path: "${{ github.workspace }}/watchman/cucumber-report.json"
