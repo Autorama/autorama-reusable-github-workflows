@@ -1,4 +1,4 @@
-name: nodejs-build
+name: feature-test-pack-workflow
 
 on:
   workflow_dispatch:
