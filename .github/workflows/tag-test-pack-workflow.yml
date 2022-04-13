@@ -2,15 +2,38 @@ name: tag-test-pack-workflow
 on:
   workflow_dispatch:
     inputs:
+      watchman_repo:
+        type: string
+        required: true
       env:
         type: string
         required: true
       test-pack-tag:
         type: string
         required: true
+        
 jobs:
-  init:
+  run-test-pack:
+    needs: [setup]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        value:
+          - ${{ fromJson(github.event.inputs.test_packs) }}
     steps:
-      - uses: actions/checkout@v2
-      - run: echo hello world
+      - uses: ruby/setup-ruby@v1 # https://github.com/ruby/setup-ruby
+        with:
+          ruby-version: 2.6.5
+      - run: |
+          # checkout watchman repo using git
+          git clone https://${{ secrets.GRID_GIT_TOKEN }}@github.com/Autorama/watchman.git 
+          cd watchman/features
+          BUNDLE_GEMFILE="${{ github.workspace }}/watchman/Gemfile"
+          bundle install
+          echo "here's the matrix value"
+          echo ${{ matrix.value.test_pack }}
+          bundle exec cucumber ./${{ matrix.value.test_pack }} ENVIRONMENT=${{ env.env }} BROWSER=headless --format json --out=cucumber-report.json -q -f pretty
+      - uses: deblockt/cucumber-report-annotations-action@v1.7
+        with:
+          access-token: ${{ secrets.GRID_GIT_TOKEN }}
+          path: "${{ github.workspace }}/watchman/cucumber-report.json"
