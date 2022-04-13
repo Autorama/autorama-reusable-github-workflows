@@ -15,6 +15,10 @@ on:
         type: string
         required: true
         description: test packs json. eg. [{\"test_pack\":\"olaf_features\"},{\"test_pack\":\"wishlist_features\"}]
+      browser:
+        type: string
+        required: false
+        default: headless
     secrets:
       grid_git_grid_token:
         required: true
@@ -39,7 +43,7 @@ jobs:
           bundle install
           echo "here's the matrix value"
           echo ${{ matrix.value.test_pack }}
-          bundle exec cucumber ./${{ matrix.value.test_pack }} ENVIRONMENT=${{ inputs.env }} BROWSER=headless --format json --out=cucumber-report.json -q -f pretty
+          bundle exec cucumber ./${{ matrix.value.test_pack }} ENVIRONMENT=${{ inputs.env }} BROWSER=inputs.browser --format json --out=cucumber-report.json -q -f pretty
       - uses: deblockt/cucumber-report-annotations-action@v1.7
         with:
           access-token: ${{ secrets.grid_git_grid_token }}
