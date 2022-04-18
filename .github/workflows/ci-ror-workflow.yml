@@ -25,7 +25,7 @@ jobs:
       - name: Run Unit Test
         run: |
           docker-compose -f docker-compose.ci.yml -p 123 build \
-            --build-arg ENV=${{ inputs.env }} --build-arg GITHUB_TOKEN=${{ secrets.grid_git_token }} \
+            --build-arg ENV=${{ inputs.env }} --build-arg $GIT_TOKEN=${{ secrets.grid_git_token }} \
             --build-arg CI=true web
           docker-compose -f docker-compose.ci.yml -p 123 run -u $(id -u) \
             -e HOME=/tmp -e RAILS_ENV=test web \
