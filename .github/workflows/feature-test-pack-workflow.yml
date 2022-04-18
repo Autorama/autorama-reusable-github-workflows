@@ -25,7 +25,6 @@ on:
 
 jobs:
   run-test-pack:
-    needs: [setup]
     runs-on: ubuntu-latest
     strategy:
       matrix:
