@@ -59,8 +59,6 @@ jobs:
           curl ${{ env.BUILD_ENV_EXEC_S3_PATH }} --output build-env-var.linux-amd64
           chmod +x build-env-var.linux-amd64
       - run: |
-          eval "$(./build-env-var.linux-amd64 -ignoreMissing -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envTemplate=env.template -envStdout)"
-          
           dot_env_file_api_url="https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{ inputs.app }}/.env.${{ inputs.env }}?ref=master"
 
           # check if file exist
@@ -71,6 +69,8 @@ jobs:
             | head -n 1 | cut -d$' ' -f2)
 
           if [[ "$HTTP_STATUS" == "200" ]]; then
+            eval "$(./build-env-var.linux-amd64 -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -pathLookup -envStdout)"
+
             curl \
               -H "Accept: application/vnd.github.v3+json" \
               -H "Authorization: token ${{ secrets.grid_git_token }}" \
@@ -78,6 +78,8 @@ jobs:
               | jq -r ".content" | base64 --decode > .env
           
             source .env
+          else
+            eval "$(./build-env-var.linux-amd64 -ignoreMissing -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envTemplate=env.template -envStdout)"
           fi
 
           export NODE_ENV='development'
