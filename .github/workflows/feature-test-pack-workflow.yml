@@ -43,7 +43,3 @@ jobs:
           echo "here's the matrix value"
           echo ${{ matrix.value.test_pack }}
           bundle exec cucumber ./${{ matrix.value.test_pack }} ENVIRONMENT=${{ inputs.env }} BROWSER=${{ inputs.browser }} --format json --out=cucumber-report.json -q -f pretty
-      - uses: deblockt/cucumber-report-annotations-action@v1.7
-        with:
-          access-token: ${{ secrets.grid_git_grid_token }}
-          path: "${{ github.workspace }}/watchman/cucumber-report.json"
