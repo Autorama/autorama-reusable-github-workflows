@@ -3,7 +3,6 @@
 # Environment Variables as Input:
 #   $APP - app/repository name
 #   $ENV - environment
-#   $ECR_REPOSITORY_NAME - ECR repository name
 #   $GITHUB_API_URL - github repository url
 #   $ARTIFACT_TAG - github tag used for deployment (release-5488a22)
 #   $GITHUB_PAT - github PAT token
