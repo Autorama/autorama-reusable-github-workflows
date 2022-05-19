@@ -20,7 +20,7 @@ previous_commit_sha=$(curl \
     --location --request POST 'https://api.github.com/graphql' \
     --header "Authorization: token ${GITHUB_PAT}" \
     --header 'Content-Type: application/json' \
-    --data-raw "{\"query\":\"query {\r\n    repository (owner: \\\"Autorama\\\", name: \\\"${APP}\\\") {\r\n        deployments (last: 20, environments: [\\\"{$ENV}\\\"]) {\r\n            nodes {\r\n                id\r\n                commitOid\r\n                environment\r\n                payload\r\n                latestStatus {\r\n                    state\r\n                    createdAt\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\",\"variables\":{}}" \
+    --data-raw "{\"query\":\"query {\r\n    repository (owner: \\\"Autorama\\\", name: \\\"$APP\\\") {\r\n        deployments (last: 20, environments: [\\\"$ENV\\\"]) {\r\n            nodes {\r\n                id\r\n                commitOid\r\n                environment\r\n                payload\r\n                latestStatus {\r\n                    state\r\n                    createdAt\r\n                }\r\n            }\r\n        }\r\n    }\r\n}\",\"variables\":{}}" \
         | jq ".data.repository.deployments.nodes" \
         | jq '[.[] | select(.latestStatus.state == "SUCCESS" or .latestStatus.state == "INACTIVE")]' \
         | jq '. | group_by(.payload) | map({id: .[-1].id, payload: .[-1].payload, latestStatus: .[-1].latestStatus, commitOid: .[-1].commitOid})' \
