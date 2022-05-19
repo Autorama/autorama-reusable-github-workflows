@@ -11,7 +11,6 @@
 # Environment Variables as Output:
 #   $JIRA_TICKETS - string of whitespace separated multiple JIRA tickets (e.g. "DIG-1 DIG-2 DIG-3")
 
-ECR_TAG_PREFIX=$(echo $ARTIFACT_TAG | cut -d'-' -f1)
 JIRA_TICKETS_ARRAY=()
 
 # Extract Jira ticket numbers from commits between $ARTIFACT_TAG and previous tag
