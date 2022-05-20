@@ -59,7 +59,7 @@ jobs:
           curl ${{ env.BUILD_ENV_EXEC_S3_PATH }} --output build-env-var.linux-amd64
           chmod +x build-env-var.linux-amd64
       - run: |
-          dot_env_file_api_url="https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{ inputs.app }}/.env.${{ inputs.env }}?ref=feature/rewrites-env-vars"
+          dot_env_file_api_url="https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{ inputs.app }}/.env.${{ inputs.env }}?ref=feature/sitemaps-env-vars"
 
           # check if file exist
           HTTP_STATUS=$(curl -I \
