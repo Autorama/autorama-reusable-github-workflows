@@ -34,7 +34,6 @@ previous_commit_sha=$(curl \
 
 ARTIFACT_TAG_SHORT_SHA=$(echo $ARTIFACT_TAG | cut -d'-' -f2)
 PREVIOUS_TAG_SHORT_SHA=${previous_commit_sha:0:7}
-PREVIOUS_TAG_SHORT_SHA=455a4ce
 echo Comparing $PREVIOUS_TAG_SHORT_SHA...$ARTIFACT_TAG_SHORT_SHA
 
 JIRA_TICKET_NUMBERS=($(curl -s \
