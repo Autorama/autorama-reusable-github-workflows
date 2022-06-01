@@ -13,6 +13,9 @@
 
 JIRA_TICKETS_ARRAY=()
 
+declare -A environments
+environments=([dev]=1 [uat]=2 [pre-prod]=3 [prod]=4)
+
 # Extract Jira ticket numbers from commits between $ARTIFACT_TAG and previous tag
 
 previous_commit_sha=$(curl \
@@ -31,6 +34,7 @@ previous_commit_sha=$(curl \
 
 ARTIFACT_TAG_SHORT_SHA=$(echo $ARTIFACT_TAG | cut -d'-' -f2)
 PREVIOUS_TAG_SHORT_SHA=${previous_commit_sha:0:7}
+PREVIOUS_TAG_SHORT_SHA=455a4ce
 echo Comparing $PREVIOUS_TAG_SHORT_SHA...$ARTIFACT_TAG_SHORT_SHA
 
 JIRA_TICKET_NUMBERS=($(curl -s \
@@ -57,11 +61,21 @@ for issue_id in "${jira_refs_list_unique[@]}"; do
         --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
         --header 'Accept: application/json')
 
+    env_in_jira=$(curl -s \
+        --url "https://autorama.atlassian.net/rest/api/3/issue/$issue_id" \
+        --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
+        --header 'Accept: application/json' \
+            | jq '.fields.customfield_10132[0].value' \
+            | tr -d \" \
+            | tr '[:upper:]' '[:lower:]')
+
     if [[ "$(echo $issue_api_response | jq 'has("errorMessages")')" == "true" ]]; then
         echo "Issue do not exist: $issue_id; $issue_api_response"
     elif [[ "$(echo $issue_api_response | jq '.fields.project.key' | tr -d \")" != "DIG" ]]; then
         echo "Issue do not exist in Digital project - $issue_id"
         echo "issue belongs to project: $(echo $issue_api_response | jq '.fields.project')"
+    elif [[ "$env_in_jira" != "null" ]] && [ ${environments[$ENV]} -lt ${environments[$env_in_jira]} ]; then
+        echo "will not override $issue_id from $env_in_jira to $ENV"
     else
         existing_jira_refs+=($issue_id)
     fi
