@@ -92,11 +92,10 @@ jobs:
       - name: Docker build
         run: |
           ARTEFACT_TAG=${{ inputs.tag }}
-          # ./build-env-var.linux-amd64 -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envFile=.env.ci
           ./build-env-var.linux-amd64 -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -pathLookup -envStdout
           curl \
             -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token $GIT_TOKEN" \
+            -H "Authorization: token ${{ secrets.grid_git_token }}" \
             https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{ inputs.app }}/.env.ci?ref=feature/DIG-9601-nsf-env-file \
             | jq -r ".content" | base64 --decode > .env.ci
           source .env.ci
