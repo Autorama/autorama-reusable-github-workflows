@@ -31,6 +31,8 @@ on:
         required: true
       grid_env_gha_action_role:
         required: true
+      grid_github_token:
+        required: true
 
 jobs:
   set-env:
