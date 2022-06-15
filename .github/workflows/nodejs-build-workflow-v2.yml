@@ -31,6 +31,8 @@ on:
         required: true
       grid_env_gha_action_role:
         required: true
+      grid_github_token:
+        required: true
 
 jobs:
   set-env:
@@ -90,7 +92,13 @@ jobs:
       - name: Docker build
         run: |
           ARTEFACT_TAG=${{ inputs.tag }}
-          ./build-env-var.linux-amd64 -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envFile=.env.ci
+          eval $(./build-env-var.linux-amd64 -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -pathLookup -envStdout)
+          curl \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.grid_github_token }}" \
+            https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{ inputs.app }}/.env.${{ inputs.env }}?ref=feature/DIG-9601-nsf-env-file \
+            | jq -r ".content" | base64 --decode > .env.ci
+          source .env.ci
           docker build -t ${{ secrets.grid_prod_repo_prefix }}/${{ inputs.app }}:${ARTEFACT_TAG} \
           --cache-from ${{ secrets.grid_prod_repo_prefix }}/${{ inputs.app }}:latest .
 
