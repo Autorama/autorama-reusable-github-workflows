@@ -92,7 +92,7 @@ jobs:
       - name: Docker build
         run: |
           ARTEFACT_TAG=${{ inputs.tag }}
-          ./build-env-var.linux-amd64 -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -pathLookup -envStdout
+          eval $(./build-env-var.linux-amd64 -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -pathLookup -envStdout)
           curl \
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.grid_github_token }}" \
