@@ -31,6 +31,8 @@ on:
         required: true
       grid_env_gha_action_role:
         required: true
+      grid_github_token:
+        required: false
 
 jobs:
   set-env:
@@ -90,7 +92,28 @@ jobs:
       - name: Docker build
         run: |
           ARTEFACT_TAG=${{ inputs.tag }}
-          ./build-env-var.linux-amd64 -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envFile=.env.ci
+
+          dot_env_file_api_url="https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{ inputs.app }}/.env.${{ inputs.env }}?ref=master"
+
+          # check if file exist
+          HTTP_STATUS=$(curl -I \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.grid_github_token }}" \
+            "$dot_env_file_api_url" \
+            | head -n 1 | cut -d$' ' -f2)
+          
+          if [[ "$HTTP_STATUS" == "200" ]]; then
+            eval $(./build-env-var.linux-amd64 -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -pathLookup -envStdout)
+            curl \
+              -H "Accept: application/vnd.github.v3+json" \
+              -H "Authorization: token ${{ secrets.grid_github_token }}" \
+              "$dot_env_file_api_url" \
+              | jq -r ".content" | base64 --decode > .env.ci
+            source .env.ci
+          else
+            ./build-env-var.linux-amd64 -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envFile=.env.ci
+          fi
+
           docker build -t ${{ secrets.grid_prod_repo_prefix }}/${{ inputs.app }}:${ARTEFACT_TAG} \
           --cache-from ${{ secrets.grid_prod_repo_prefix }}/${{ inputs.app }}:latest .
 
