@@ -16,9 +16,8 @@ on:
     secrets:
       grid_git_token:
         required: false
-
 jobs:
-  unit-test:
+  Test-Suite-RSpec:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,9 +30,10 @@ jobs:
             -e HOME=/tmp -e RAILS_ENV=test web \
             bundle exec rspec --format documentation --format RspecJunitFormatter --out results.xml            
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v2
+        uses: mikepenz/action-junit-report@v3
         with:
           report_paths: '**/results.xml'
+          annotate_only: true
       - name: collect unit-test artefacts
         if: ${{ inputs.skip_artefact_caching != true }}
         run: |
@@ -47,4 +47,29 @@ jobs:
         uses: actions/cache@v2
         with:
           path: unit-test-artefacts
-          key: unit-test-artefacts-${{ github.run_number }}
+          key: unit-test-artefacts-${{ github.run_number }}  
+  
+  Rubocop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '3.1.2'
+      - run: bundle install
+      - name: Rubocop
+        run: rubocop --format fuubar --display-time
+
+
+  Brakeman:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '3.1.2'
+      - run: bundle install
+      - name: Brakeman
+        run: brakeman --no-pager --quiet        
