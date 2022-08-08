@@ -40,7 +40,7 @@ jobs:
         run: |
           mkdir unit-test-artefacts
           # cp coverage/.resultset.json unit-test-artefacts/.resultset.json
-          cp coverage/coverage.json unit-test-artefacts/coverage.json
+          # cp coverage/coverage.json unit-test-artefacts/coverage.json
           cp results.xml unit-test-artefacts/results.xml
 
           ls -lah unit-test-artefacts
