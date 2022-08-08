@@ -2,6 +2,15 @@ name: ci-sonarcloud-scan
 
 on:
   workflow_call:
+    inputs:
+      has_resultset_json:
+        type: boolean
+        required: false
+        default: true
+      has_coverage_json:
+        type: boolean
+        required: false
+        default: true
     secrets:
       grid_github_token:
         required: true
@@ -21,11 +30,17 @@ jobs:
           path: unit-test-artefacts
           key: unit-test-artefacts-${{ github.run_number }}
       - run: |
-          # cp unit-test-artefacts/.resultset.json .resultset.json
-          # cp unit-test-artefacts/coverage.json coverage.json
+          if [[ "${{ inputs.has_resultset_json }} == "true" ]]; then
+            cp unit-test-artefacts/.resultset.json .resultset.json
+          fi
+          
+          if [[ "${{ inputs.has_coverage_json }} == "true" ]]; then
+            cp unit-test-artefacts/coverage.json coverage.json
+          fi
           cp unit-test-artefacts/results.xml results.xml
-#       - name: fix code coverage paths
-#         run: sed -i 's@'/app/app/'@/github/workspace/app/@g' coverage.json
+      - name: fix code coverage paths
+        if: ${{ inputs.has_coverage_json == true }}
+        run: sed -i 's@'/app/app/'@/github/workspace/app/@g' coverage.json
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
