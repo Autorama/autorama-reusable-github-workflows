@@ -13,6 +13,14 @@ on:
         type: boolean
         required: false
         default: false
+      has_resultset_json:
+        type: boolean
+        required: false
+        default: true
+      has_coverage_json:
+        type: boolean
+        required: false
+        default: true
     secrets:
       grid_git_token:
         required: false
@@ -39,8 +47,13 @@ jobs:
         if: ${{ inputs.skip_artefact_caching != true }}
         run: |
           mkdir unit-test-artefacts
-          # cp coverage/.resultset.json unit-test-artefacts/.resultset.json
-          # cp coverage/coverage.json unit-test-artefacts/coverage.json
+          if [[ "${{ inputs.has_resultset_json }} == "true" ]]; then
+            cp coverage/.resultset.json unit-test-artefacts/.resultset.json
+          fi
+          
+          if [[ "${{ inputs.has_coverage_json }} == "true" ]]; then
+            cp coverage/coverage.json unit-test-artefacts/coverage.json
+          fi
           cp results.xml unit-test-artefacts/results.xml
 
           ls -lah unit-test-artefacts
