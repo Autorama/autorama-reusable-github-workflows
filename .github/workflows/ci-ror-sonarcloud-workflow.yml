@@ -21,7 +21,8 @@ jobs:
           path: unit-test-artefacts
           key: unit-test-artefacts-${{ github.run_number }}
       - run: |
-          cp unit-test-artefacts/.resultset.json .resultset.json
+          mkdir coverage
+          cp unit-test-artefacts/.resultset.json coverage/.resultset.json
           cp unit-test-artefacts/coverage.json coverage.json
           cp unit-test-artefacts/results.xml results.xml
       - name: fix code coverage paths
