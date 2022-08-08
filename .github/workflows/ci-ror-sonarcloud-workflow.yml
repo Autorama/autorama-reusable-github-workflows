@@ -22,10 +22,10 @@ jobs:
           key: unit-test-artefacts-${{ github.run_number }}
       - run: |
           # cp unit-test-artefacts/.resultset.json .resultset.json
-          cp unit-test-artefacts/coverage.json coverage.json
+          # cp unit-test-artefacts/coverage.json coverage.json
           cp unit-test-artefacts/results.xml results.xml
-      - name: fix code coverage paths
-        run: sed -i 's@'/app/app/'@/github/workspace/app/@g' coverage.json
+#       - name: fix code coverage paths
+#         run: sed -i 's@'/app/app/'@/github/workspace/app/@g' coverage.json
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
