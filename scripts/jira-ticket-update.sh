@@ -1,4 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash
+
+set -x
 
 # Environment Variables as Input:
 #   $APP - app/repository name
