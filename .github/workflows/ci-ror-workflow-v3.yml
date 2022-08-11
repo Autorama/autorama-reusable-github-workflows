@@ -37,6 +37,8 @@ jobs:
       - name: collect unit-test artefacts
         if: ${{ inputs.skip_artefact_caching != true }}
         run: |
+          find . -name coverage.json
+          ls -al
           mkdir unit-test-artefacts
           cp tmp/coverage/.resultset.json unit-test-artefacts/.resultset.json
           cp tmp/coverage/coverage.json unit-test-artefacts/coverage.json
