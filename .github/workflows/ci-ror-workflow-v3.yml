@@ -40,8 +40,8 @@ jobs:
           find . -name coverage.json
           ls -al
           mkdir unit-test-artefacts
-          cp tmp/coverage/.resultset.json unit-test-artefacts/.resultset.json
-          cp tmp/coverage/coverage.json unit-test-artefacts/coverage.json
+          cp ./coverage/.resultset.json unit-test-artefacts/.resultset.json
+          cp ./coverage/coverage.json unit-test-artefacts/coverage.json
           cp results.xml unit-test-artefacts/results.xml
           ls -lah unit-test-artefacts
       - name: Cache unit-test artefacts
