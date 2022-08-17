@@ -71,29 +71,22 @@ jobs:
           bundle install
       - name: run tests
         run: |
-          if [ -z "${{ matrix.value.test_pack }}" ]; then
-            export test_type="tag"
-            export test_pack=${{ matrix.value.tag }}
-          else
-            export test_type="feature"
-            export test_pack=${{ matrix.value.test_pack }}
-          fi
-
-          echo "running ${test_type} ${test_pack}"
-          
           cd watchman
           export DISPLAY=:99
           chromedriver --url-base=/wd/hub &
           sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
           
           date_now="$(date +%F)"
-          report_file_name="${test_pack}.html"
           cucumber_exit_code="0"
 
-          if [ "$test_type" == "feature" ]; then
-            bundle exec cucumber ./features/${test_pack} ENVIRONMENT=${{ inputs.env }} BROWSER=${{ matrix.value.browser }} --format html --out=${report_file_name} -f pretty || cucumber_exit_code="$?"
+          if [ -z "${{ matrix.value.test_pack }}" ]; then
+            echo "running test for tag ${{ matrix.value.tag }}"
+            report_file_name="${{ matrix.value.tag }}.html"
+            cucumber --tag @${{ matrix.value.tag }} ENVIRONMENT=${{ inputs.env }}	BROWSER=${{ matrix.value.browser }} --format html --out=${report_file_name} -f pretty || cucumber_exit_code="$?"
           else
-            cucumber --tag @${test_pack} ENVIRONMENT=${{ inputs.env }}	BROWSER=${{ matrix.value.browser }} --format html --out=${report_file_name} -f pretty || cucumber_exit_code="$?"
+            echo "running test for feature ${{ matrix.value.test_pack }}"
+            report_file_name="${{ matrix.value.test_pack }}.html"
+            bundle exec cucumber ./features/${{ matrix.value.test_pack }} ENVIRONMENT=${{ inputs.env }} BROWSER=${{ matrix.value.browser }} --format html --out=${report_file_name} -f pretty || cucumber_exit_code="$?"
           fi
 
           echo "tests completed with exit code ${cucumber_exit_code}"
