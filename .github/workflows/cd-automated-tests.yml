@@ -29,7 +29,7 @@ on:
           
           [{\"tag\":\"levc\","\browser\":\"headless\"},{\"tag\":\"hub_pages\","\browser\":\"headless\"}]
 
-          [{\"test_pack\":\"olaf_features\","\browser\":\"chrome\"},{\"test_pack\":\"wishlist_features\","\browser\":\"chrome\"}]
+          [{\"feature\":\"olaf_features\","\browser\":\"chrome\"},{\"feature\":\"wishlist_features\","\browser\":\"chrome\"}]
     secrets:
       grid_git_grid_token:
         required: true
@@ -79,14 +79,14 @@ jobs:
           date_now="$(date +%F)"
           cucumber_exit_code="0"
 
-          if [ -z "${{ matrix.value.test_pack }}" ]; then
+          if [ -z "${{ matrix.value.feature }}" ]; then
             echo "running test for tag ${{ matrix.value.tag }}"
             report_file_name="${{ matrix.value.tag }}.html"
             cucumber --tag @${{ matrix.value.tag }} ENVIRONMENT=${{ inputs.env }}	BROWSER=${{ matrix.value.browser }} --format html --out=${report_file_name} -f pretty || cucumber_exit_code="$?"
           else
-            echo "running test for feature ${{ matrix.value.test_pack }}"
-            report_file_name="${{ matrix.value.test_pack }}.html"
-            bundle exec cucumber ${{ matrix.value.test_pack }} ENVIRONMENT=${{ inputs.env }} BROWSER=${{ matrix.value.browser }} --format html --out=${report_file_name} -f pretty || cucumber_exit_code="$?"
+            echo "running test for feature ${{ matrix.value.feature }}"
+            report_file_name="${{ matrix.value.feature }}.html"
+            bundle exec cucumber ${{ matrix.value.feature }} ENVIRONMENT=${{ inputs.env }} BROWSER=${{ matrix.value.browser }} --format html --out=${report_file_name} -f pretty || cucumber_exit_code="$?"
           fi
 
           echo "tests completed with exit code ${cucumber_exit_code}"
