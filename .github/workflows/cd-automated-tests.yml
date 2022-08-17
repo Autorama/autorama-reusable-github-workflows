@@ -56,7 +56,6 @@ jobs:
       - uses: nanasess/setup-chromedriver@v1
         with:
           chromedriver-version: '104.0.5112.79'
-          # chromedriver-version: '101.0.4951.41'
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ${{ inputs.aws_region }}
