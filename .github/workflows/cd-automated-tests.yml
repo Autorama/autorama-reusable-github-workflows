@@ -86,7 +86,7 @@ jobs:
           else
             echo "running test for feature ${{ matrix.value.test_pack }}"
             report_file_name="${{ matrix.value.test_pack }}.html"
-            bundle exec cucumber ./features/${{ matrix.value.test_pack }} ENVIRONMENT=${{ inputs.env }} BROWSER=${{ matrix.value.browser }} --format html --out=${report_file_name} -f pretty || cucumber_exit_code="$?"
+            bundle exec cucumber ${{ matrix.value.test_pack }} ENVIRONMENT=${{ inputs.env }} BROWSER=${{ matrix.value.browser }} --format html --out=${report_file_name} -f pretty || cucumber_exit_code="$?"
           fi
 
           echo "tests completed with exit code ${cucumber_exit_code}"
