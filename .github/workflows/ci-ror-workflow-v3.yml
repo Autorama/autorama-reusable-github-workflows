@@ -37,7 +37,7 @@ jobs:
           mkdir unit-test-artefacts
           cp ./coverage/.resultset.json unit-test-artefacts/.resultset.json
           cp ./coverage/coverage.json unit-test-artefacts/coverage.json
-          touch unit-test-artefacts/results.xml
+          echo "This is not valid" >> unit-test-artefacts/results.xml
           ls -lah unit-test-artefacts
       - name: Cache unit-test artefacts
         if: ${{ inputs.skip_artefact_caching != true }}
