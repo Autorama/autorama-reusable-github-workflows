@@ -55,7 +55,7 @@ jobs:
           ruby-version: '3.1.2'
       - run: bundle install
       - name: Rubocop
-        run: rubocop --format fuubar --display-time
+        run: rubocop --display-time
 
 
   Brakeman:
