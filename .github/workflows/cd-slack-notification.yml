@@ -1,0 +1,45 @@
+name: cd-slack-notification
+
+on:
+  workflow_call:
+    inputs:
+      text:
+        type: string
+        required: true
+      app:
+        type: string
+        required: true
+      jira_tickets:
+        type: string
+        required: false
+        default: ''
+      color_badge:
+        type: boolean
+        required: true
+    secrets:
+      slack_webhook_url:
+        required: true
+
+jobs:
+  slack-notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack message
+        uses: slackapi/slack-github-action@v1.16.0
+        with:
+          payload: |
+            {
+              "text": "${{ inputs.text }}",
+              "attachments": [
+                  {
+                      "fields": [
+                          { "title": "Application", "value": "${{ inputs.app }}", "short": false },
+                          { "title": "Jira references", "value": "${{ inputs.jira_tickets }}", "short": false }
+                      ],
+                      "color": "${{ inputs.color_badge }}"
+                  }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.slack_webhook_url }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
