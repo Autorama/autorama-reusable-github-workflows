@@ -14,7 +14,7 @@ on:
         required: false
         default: ''
       color_badge:
-        type: boolean
+        type: string
         required: true
     secrets:
       slack_webhook_url:
