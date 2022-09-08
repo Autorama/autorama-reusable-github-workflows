@@ -7,6 +7,11 @@ on:
         type: string
         required: true
         description: watchman repository follwing the format - {org}/{repo}
+      app:
+        type: string
+        required: false
+        default: watchman
+        description: name of the app (not required)
       env:
         type: string
         required: true
@@ -27,13 +32,19 @@ on:
           
           examples:
           
-          [{\"tag\":\"levc\","\browser\":\"headless\"},{\"tag\":\"hub_pages\","\browser\":\"headless\"}]
+          [{\"tag\":\"levc\",\"browser\":\"headless\"},{\"tag\":\"hub_pages\",\"browser\":\"headless\"}]
 
-          [{\"feature\":\"olaf_features\","\browser\":\"chrome\"},{\"feature\":\"wishlist_features\","\browser\":\"chrome\"}]
+          [{\"feature\":\"features/smoke_tests_features/non_reg_user_olaf\",\"browser\":\"chrome\"},{\"feature\":\"features/smoke_tests_features/reg_user_olaf\",\"browser\":\"chrome\"}]
+      slack_notification_text:
+        type: string
+        required: false
+        default: Scheduled automated tests
     secrets:
       grid_git_grid_token:
         required: true
       aws_role:
+        required: true
+      slack_webhook_url:
         required: true
 
 jobs:
@@ -99,3 +110,37 @@ jobs:
           if [[ "$cucumber_exit_code" != "0" ]]; then
             exit 1
           fi
+
+  slack-notify:
+    runs-on: ubuntu-latest
+    needs: [run-test-pack]
+    outputs:
+      tag: ${{ steps.variables.outputs.report_urls }}
+    if: always()
+    steps:
+      - name: set variables
+        id: variables
+        run: |
+          date_now="$(date +%F)"
+          url_prefix="https://${{ inputs.s3_bucket_reports }}.s3.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.env }}/${date_now}/"
+          report_urls=$(echo ${{ inputs.test_pack_json }} | jq "map(\"${url_prefix}\" + .feature + .tag + \".html\") | .[]" | tr -d \")
+          echo "::set-output name=report_urls::${report_urls}"
+      - name: Send Slack message
+        uses: slackapi/slack-github-action@v1.16.0
+        with:
+          payload: |
+            {
+              "text": "${{ inputs.text }} ${{ needs.run-test-pack.result }}",
+              "attachments": [
+                  {
+                      "fields": [
+                          { "title": "Application", "value": "${{ inputs.app }}", "short": false },
+                          { "title": "Links to test pack results", "value": "${{ steps.variables.outputs.report_urls }}", "short": false }
+                      ],
+                      "color": "${{ needs.run-test-pack.result == 'failure' && 'danger' || 'good' }}"
+                  }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.slack_webhook_url }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
