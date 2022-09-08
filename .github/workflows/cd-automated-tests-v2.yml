@@ -12,6 +12,10 @@ on:
         required: false
         default: watchman
         description: name of the app (not required)
+      slack_notification_text:
+        type: string
+        required: false
+        default: Scheduled automated tests
       env:
         type: string
         required: true
@@ -35,10 +39,6 @@ on:
           [{\"tag\":\"levc\",\"browser\":\"headless\"},{\"tag\":\"hub_pages\",\"browser\":\"headless\"}]
 
           [{\"feature\":\"features/smoke_tests_features/non_reg_user_olaf\",\"browser\":\"chrome\"},{\"feature\":\"features/smoke_tests_features/reg_user_olaf\",\"browser\":\"chrome\"}]
-      slack_notification_text:
-        type: string
-        required: false
-        default: Scheduled automated tests
     secrets:
       grid_git_grid_token:
         required: true
