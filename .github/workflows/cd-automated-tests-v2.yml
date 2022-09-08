@@ -123,15 +123,10 @@ jobs:
         id: variables
         run: |
           date_now="$(date +%F)"
-          echo write temp json
           echo '${{ inputs.test_pack_json }}' > tmp.json
-          echo read temp json
           cat tmp.json
-          echo generate url prefix
           url_prefix="https://${{ inputs.s3_bucket_reports }}.s3.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.env }}/${date_now}/"
-          echo generate urls
-          report_urls=$(cat tmp.json | jq "map(\"${url_prefix}\" + .feature + .tag + \".html\") | .[]" | tr -d \")
-          echo set output
+          report_urls=$(cat tmp.json | jq "map(\"${url_prefix}\" + .feature + .tag + \".html\") | join(\"\\\n\")")
           echo "::set-output name=report_urls::${report_urls}"
       - name: Send Slack message
         uses: slackapi/slack-github-action@v1.16.0
