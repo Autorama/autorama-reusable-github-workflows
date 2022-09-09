@@ -36,7 +36,7 @@ on:
           
           examples:
           
-          [{\"tag\":\"@regression and not (@registered_user or @fail)\",\"browser\":\"headless\"},{\"tag\":\"@user_management\",\"browser\":\"chrome\"}]
+          [{\"tag\":\"@regression and not (@registered_user or @fail)\",\"browser\":\"chrome\"},{\"tag\":\"@user_management\",\"browser\":\"chrome\"}]
 
           [{\"feature\":\"features/smoke_tests_features/non_reg_user_olaf\",\"browser\":\"chrome\"},{\"feature\":\"features/smoke_tests_features/reg_user_olaf\",\"browser\":\"chrome\"}]
     secrets:
