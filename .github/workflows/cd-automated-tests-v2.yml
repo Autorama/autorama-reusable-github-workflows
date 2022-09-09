@@ -56,7 +56,7 @@ jobs:
       id-token: write
       contents: read
     strategy:
-      # fail-fast: false
+      fail-fast: false
       matrix:
         value:
           - ${{ fromJson(inputs.test_pack_json) }}
