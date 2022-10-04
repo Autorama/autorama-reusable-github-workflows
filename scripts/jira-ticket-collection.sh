@@ -33,7 +33,7 @@ previous_commit_sha=$(curl \
 
 # extract jira refs from commits betweeen $previous_tag_name and $ARTIFACT_TAG
 
-ARTIFACT_TAG_SHORT_SHA=$(echo $ARTIFACT_TAG | cut -d'-' -f2)
+ARTIFACT_TAG_SHORT_SHA=$(echo $ARTIFACT_TAG | grep -E '[a-z0-9]{7}$' -o)
 PREVIOUS_TAG_SHORT_SHA=${previous_commit_sha:0:7}
 echo Comparing $PREVIOUS_TAG_SHORT_SHA...$ARTIFACT_TAG_SHORT_SHA
 
