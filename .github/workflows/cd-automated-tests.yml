@@ -24,9 +24,9 @@ on:
         required: true
         description: |
           test packs json.
-          
+
           examples:
-          
+
           [{\"tag\":\"levc\","\browser\":\"headless\"},{\"tag\":\"hub_pages\","\browser\":\"headless\"}]
 
           [{\"feature\":\"olaf_features\","\browser\":\"chrome\"},{\"feature\":\"wishlist_features\","\browser\":\"chrome\"}]
@@ -55,7 +55,7 @@ jobs:
           ruby-version: 2.6.5
       - uses: nanasess/setup-chromedriver@v1
         with:
-          chromedriver-version: '104.0.5112.79'
+          chromedriver-version: "106.0.5249.91"
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ${{ inputs.aws_region }}
@@ -63,7 +63,7 @@ jobs:
       - name: clone watchman repo
         run: |
           # checkout watchman repo using git
-          git clone https://${{ secrets.grid_git_grid_token }}@github.com/${{ inputs.watchman_repo }}.git 
+          git clone https://${{ secrets.grid_git_grid_token }}@github.com/${{ inputs.watchman_repo }}.git
       - name: install dependencies
         run: |
           cd watchman/features
@@ -75,7 +75,7 @@ jobs:
           export DISPLAY=:99
           chromedriver --url-base=/wd/hub &
           sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
-          
+
           date_now="$(date +%F)"
           cucumber_exit_code="0"
 
@@ -90,7 +90,7 @@ jobs:
           fi
 
           echo "tests completed with exit code ${cucumber_exit_code}"
-          
+
           aws s3 cp --acl public-read ${report_file_name} s3://${{ inputs.s3_bucket_reports }}/${{ inputs.env }}/${date_now}/${report_file_name}
 
           echo "report available at:"
