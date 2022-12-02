@@ -38,7 +38,7 @@ jobs:
           ls -lah unit-test-artefacts
       - name: Cache unit-test artefacts
         if: ${{ inputs.skip_artefact_caching != true }}
-        uses: actions/cache@v3
+        uses: actions/cache@v2
         with:
           path: unit-test-artefacts
           key: unit-test-artefacts-${{ github.run_number }}  

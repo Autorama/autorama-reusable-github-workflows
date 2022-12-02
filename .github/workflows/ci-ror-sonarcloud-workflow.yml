@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Cache unit-test artefacts
-        uses: actions/cache@v3
+        uses: actions/cache@v2
         with:
           path: unit-test-artefacts
           key: unit-test-artefacts-${{ github.run_number }}

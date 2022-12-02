@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - name: Cache unit-test coverage
-        uses: actions/cache@v3
+        uses: actions/cache@v2
         with:
           path: coverage
           key: unit-test-coverage-${{ github.run_number }}
