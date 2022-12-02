@@ -44,13 +44,13 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ${{ inputs.ecr_region }}
           role-to-assume: ${{ secrets.aws_actions_role }}
       - uses: aws-actions/amazon-ecr-login@v1
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: '14.17.0'
           architecture: 'x64'
@@ -93,7 +93,7 @@ jobs:
           yarn test
       - name: Cache unit-test coverage
         if: ${{ inputs.skip_artefact_caching != true }}
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: coverage
           key: unit-test-coverage-${{ github.run_number }}

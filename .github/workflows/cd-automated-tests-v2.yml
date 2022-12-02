@@ -123,7 +123,7 @@ jobs:
           cat tmp.json
           url_prefix="https://${{ inputs.s3_bucket_reports }}.s3.${{ inputs.aws_region }}.amazonaws.com/${{ inputs.env }}/${date_now}/"
           report_urls=$(cat tmp.json | jq "map(\"${url_prefix}\" + .feature + .tag + \".html\") | join(\"\\n\\n\")" | tr -d \")
-          echo "::set-output name=report_urls::${report_urls}"
+          echo "report_urls=${report_urls}" >> $GITHUB_OUTPUT
       - name: Send Slack message
         uses: slackapi/slack-github-action@v1.16.0
         with:

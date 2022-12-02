@@ -18,7 +18,7 @@ jobs:
   unit-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run Unit Test
         run: |
           docker-compose -f docker-compose.ci.yml -p 123 build web
@@ -27,7 +27,7 @@ jobs:
             bundle exec rspec --format RspecJunitFormatter --out results.xml \
             --format progress --format documentation
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v2
+        uses: mikepenz/action-junit-report@v3
         with:
           report_paths: '**/results.xml'
       - name: collect unit-test artefacts
@@ -41,7 +41,7 @@ jobs:
           ls -lah unit-test-artefacts
       - name: Cache unit-test artefacts
         if: ${{ inputs.skip_artefact_caching != true }}
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: unit-test-artefacts
           key: unit-test-artefacts-${{ github.run_number }}

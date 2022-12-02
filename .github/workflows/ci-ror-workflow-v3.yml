@@ -20,7 +20,7 @@ jobs:
   Test-Suite-RSpec:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run Unit Test
         run: |
           docker-compose -f docker-compose.ci.yml -p 123 build \
@@ -38,7 +38,7 @@ jobs:
           ls -lah unit-test-artefacts
       - name: Cache unit-test artefacts
         if: ${{ inputs.skip_artefact_caching != true }}
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: unit-test-artefacts
           key: unit-test-artefacts-${{ github.run_number }}  
@@ -47,8 +47,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-      - uses: actions/setup-ruby@v1
+        uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1.2'
       - run: bundle install
@@ -60,8 +60,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-      - uses: actions/setup-ruby@v1
+        uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1.2'
       - run: bundle install
