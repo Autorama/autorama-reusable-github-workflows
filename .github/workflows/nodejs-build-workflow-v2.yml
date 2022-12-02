@@ -42,7 +42,7 @@ jobs:
       github_short_sha: ${{ steps.variables.outputs.github_short_sha }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ inputs.github_sha }}
       - id: variables
@@ -52,8 +52,8 @@ jobs:
           github_actions_role_secret="GRID_${env_upper}_GHA_ACTION_ROLE"
           github_sha=${{ inputs.github_sha }}
           github_short_sha=${github_sha:0:7}
-          echo "::set-output name=github_actions_role_secret::${github_actions_role_secret}"
-          echo "::set-output name=github_short_sha::${github_short_sha}"
+          echo "github_actions_role_secret=${github_actions_role_secret}" >> $GITHUB_OUTPUT
+          echo "github_short_sha=${github_short_sha}" >> $GITHUB_OUTPUT
 
   package:
     runs-on: ubuntu-latest
@@ -62,7 +62,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ inputs.github_sha }}
       
