@@ -10,6 +10,7 @@
 #   $JIRA_API_TOKEN - Jira API Token
 #   $VERCEL_PROJECT_ID - Vercel project ID
 #   $VERCEL_TEAM_ID - Vercel team ID
+#   $GRID_VERCEL_TOKEN - Vercel token
 
 # Environment Variables as Output:
 #   $JIRA_TICKETS - string of whitespace separated multiple JIRA tickets (e.g. "DIG-1 DIG-2 DIG-3")
@@ -22,7 +23,7 @@ environments=([dev]=1 [uat]=2 [pre-prod]=3 [prod]=4)
 # since vercel creates github deployment objects under "Preview" environment for dev, uat and pre-prod
 # instead of getting deployment objects from github, query vercel deployment objects for a branch (dev, uat, pre-prod or main)
 curl -X GET "https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&teamId=${VERCEL_TEAM_ID}&app=${APP}&state=READY&limit=100" \
-    -H "Authorization: Bearer ${{ secrets.GRID_VERCEL_TOKEN }}" \
+    -H "Authorization: Bearer ${GRID_VERCEL_TOKEN}" \
     | jq -c "[.deployments[] | select(.meta.githubCommitRef == \"${DEPLOYED_BRANCH}\")]" > list_of_deployments.json
 
 # cleanup deployment json to remove escape characters if any
@@ -43,7 +44,7 @@ echo Comparing $previous_deployment_sha...$current_deployment_sha
 
 JIRA_TICKET_NUMBERS=($(curl -s \
     -H "Accept: application/vnd.github.v3+json" \
-    -H "Authorization: token ${{secrets.GRID_GIT_TOKEN}}" \
+    -H "Authorization: token ${GITHUB_PAT}" \
     "${{ steps.variables.outputs.repo }}/compare/$previous_deployment_sha...$current_deployment_sha" \
     | jq '.commits' | jq '.[].commit.message' | tr -d \" | cut -d'\' -f1 \
     | grep -P '(?i)DIG[-\s][\d]+' -o | grep -P '[\d]+' -o)) || true
