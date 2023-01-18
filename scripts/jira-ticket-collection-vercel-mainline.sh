@@ -29,6 +29,8 @@ curl -X GET "https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID
 sed -i 's/\\n/ /g' list_of_deployments.json
 sed -i 's/ //g' list_of_deployments.json
 
+# extract the previous deployed commit sha
+
 current_deployment_index=$(cat list_of_deployments.json \
     | jq "map(.meta.githubCommitSha==\"$current_deployment_sha\") | index(true)")
 
@@ -54,7 +56,7 @@ jira_refs_list_unique=($(printf '%s\n' "${JIRA_TICKETS_ARRAY[@]}" | sort -u))
 
 # filter non-existing jira tickets
 
-existing_jira_refs=()
+jira_refs_to_update=()
 
 for issue_id in "${jira_refs_list_unique[@]}"; do
 
@@ -77,12 +79,12 @@ for issue_id in "${jira_refs_list_unique[@]}"; do
         echo "Issue do not exist in Digital project - $issue_id"
         echo "issue belongs to project: $(echo $issue_api_response | jq '.fields.project')"
     elif [[ "$env_in_jira" != "null" ]] && [ ${environments[$ENV]} -lt ${environments[$env_in_jira]} ]; then
-        echo "will not override $issue_id from $env_in_jira to $ENV"
+        echo "will not override $issue_id to lower environment from $env_in_jira to $ENV"
     else
-        existing_jira_refs+=($issue_id)
+        jira_refs_to_update+=($issue_id)
     fi
 done
 
 
 # export output variables
-export JIRA_TICKETS_STRING=${existing_jira_refs[*]}
+export JIRA_TICKETS_STRING=${jira_refs_to_update[*]}
