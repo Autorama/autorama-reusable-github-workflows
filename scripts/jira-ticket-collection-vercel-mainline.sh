@@ -33,19 +33,19 @@ sed -i 's/ //g' list_of_deployments.json
 # extract the previous deployed commit sha
 
 current_deployment_index=$(cat list_of_deployments.json \
-    | jq "map(.meta.githubCommitSha==\"$current_deployment_sha\") | index(true)")
+    | jq "map(.meta.githubCommitSha==\"$DEPLOYED_SHA\") | index(true)")
 
 ((previous_deployment_index=current_deployment_index+1))
 previous_deployment_sha=$(cat list_of_deployments.json | jq -c ".[$previous_deployment_index].meta.githubCommitSha" | tr -d \")
 
-# extract jira tickets between commits previous_deployment_sha and current_deployment_sha
+# extract jira tickets between commits previous_deployment_sha and DEPLOYED_SHA
 
-echo Comparing $previous_deployment_sha...$current_deployment_sha
+echo Comparing $previous_deployment_sha...$DEPLOYED_SHA
 
 JIRA_TICKET_NUMBERS=($(curl -s \
     -H "Accept: application/vnd.github.v3+json" \
     -H "Authorization: token ${GITHUB_PAT}" \
-    "${{ steps.variables.outputs.repo }}/compare/$previous_deployment_sha...$current_deployment_sha" \
+    "${GITHUB_API_URL}/compare/$previous_deployment_sha...$DEPLOYED_SHA" \
     | jq '.commits' | jq '.[].commit.message' | tr -d \" | cut -d'\' -f1 \
     | grep -P '(?i)DIG[-\s][\d]+' -o | grep -P '[\d]+' -o)) || true
 
