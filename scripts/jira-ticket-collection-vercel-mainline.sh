@@ -42,11 +42,55 @@ previous_deployment_sha=$(cat list_of_deployments.json | jq -c ".[$previous_depl
 
 echo Comparing $previous_deployment_sha...$DEPLOYED_SHA
 
-JIRA_TICKET_NUMBERS=($(curl -s \
-    -H "Accept: application/vnd.github.v3+json" \
-    -H "Authorization: token ${GITHUB_PAT}" \
-    "${GITHUB_API_URL}/compare/$previous_deployment_sha...$DEPLOYED_SHA" \
-    | jq '.commits' | jq '.[].commit.message' | tr -d \" | cut -d'\' -f1 \
+found_current_deployment_index=false
+echo "[]" > list_of_commits.json
+page_number=1
+
+
+# loop through the paginated response of github rest api to list commits for a given branch
+# store the list of commits in a json file `list_of_commits.json`
+
+while true; do
+    response=$(curl -s -L \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${GITHUB_PAT}" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        -o tmp.json \
+        https://api.github.com/repos/Autorama/next-storefront/commits?sha=${DEPLOYED_BRANCH}\&per_page=100\&page=${page_number})
+    
+    # cleanup \n
+    sed -i 's/\\n/ /g' tmp.json
+
+    current_deployment_index=$(jq ". | map(.sha == \"$DEPLOYED_SHA\") | index(true)" tmp.json)
+
+    if [ "$current_deployment_index" != "null" ]; then
+        found_current_deployment_index=true
+    fi
+
+    if [ "$found_current_deployment_index" = "true" ]; then
+        previous_deployment_sha_index=$(jq ". | map(.sha == \"$previous_deployment_sha\") | index(true)" tmp.json)
+
+        if [ "$current_deployment_index" = "null" ]; then
+            current_deployment_index="0"
+        fi
+
+        if [ "previous_deployment_sha_index" = "null" ]; then
+            previous_deployment_sha_index=""
+        fi
+
+        jq ".[$current_deployment_index:$previous_deployment_sha_index]" tmp.json > list_of_commits_tmp.json
+        jq -s '.[0] + .[1]' "list_of_commits.json" "list_of_commits_tmp.json" > list_of_commits.json
+
+        if [ "$previous_deployment_sha_index" != "" ]; then
+            break
+        fi
+    fi
+
+    page_number=`expr $page_number + 1`
+
+done
+
+JIRA_TICKET_NUMBERS=($(jq '.' list_of_commits.json | jq '.[].commit.message' | tr -d \" | cut -d'\' -f1 \
     | grep -P '(?i)DIG[-\s][\d]+' -o | grep -P '[\d]+' -o)) || true
 
 for jira_ticket_number in "${JIRA_TICKET_NUMBERS[@]}"; do
