@@ -56,7 +56,7 @@ while true; do
         -H "Authorization: Bearer ${GITHUB_PAT}" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
         -o tmp.json \
-        https://api.github.com/repos/Autorama/next-storefront/commits?sha=${DEPLOYED_BRANCH}\&per_page=100\&page=${page_number})
+        https://api.github.com/repos/Autorama/${APP}/commits?sha=${DEPLOYED_BRANCH}\&per_page=100\&page=${page_number})
     
     # cleanup \n
     sed -i 's/\\n/ /g' tmp.json
