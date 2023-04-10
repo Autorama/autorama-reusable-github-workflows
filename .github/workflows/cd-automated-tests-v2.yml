@@ -33,9 +33,9 @@ on:
         required: true
         description: |
           test packs json.
-          
+
           examples:
-          
+
           [{\"tag\":\"@regression and not (@registered_user or @fail)\",\"browser\":\"chrome\"},{\"tag\":\"@user_management\",\"browser\":\"chrome\"}]
 
           [{\"feature\":\"features/smoke_tests_features/non_reg_user_olaf\",\"browser\":\"chrome\"},{\"feature\":\"features/smoke_tests_features/reg_user_olaf\",\"browser\":\"chrome\"}]
@@ -70,8 +70,18 @@ jobs:
           role-to-assume: ${{ secrets.aws_role }}
       - name: clone watchman repo
         run: |
-          # checkout watchman repo using git
-          git clone https://${{ secrets.grid_git_grid_token }}@github.com/${{ inputs.watchman_repo }}.git 
+          # define the environment-to-branch map
+          declare -A env_branch_map
+          env_branch_map[dev]="develop"
+          env_branch_map[uat]="master"
+          env_branch_map[pre-prod]="master"
+          env_branch_map[prod]="master"
+
+          # get the branch name from the environment variable
+          branch="${env_branch_map[${{ inputs.env }}]}"
+
+          # clone the repository using the branch name
+          git clone --branch "$branch" https://${{ secrets.grid_git_grid_token }}@github.com/${{ inputs.watchman_repo }}.git
       - name: install dependencies
         run: |
           cd watchman/features
@@ -83,7 +93,7 @@ jobs:
           export DISPLAY=:99
           chromedriver --url-base=/wd/hub &
           sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
-          
+
           date_now="$(date +%F)"
           cucumber_exit_code="0"
 
@@ -98,7 +108,7 @@ jobs:
           fi
 
           echo "tests completed with exit code ${cucumber_exit_code}"
-          
+
           aws s3 cp --acl public-read ${report_file_name} s3://${{ inputs.s3_bucket_reports }}/${{ inputs.env }}/${date_now}/${report_file_name}
 
           echo "report available at:"
