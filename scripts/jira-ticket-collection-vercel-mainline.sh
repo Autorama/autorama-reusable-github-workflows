@@ -20,17 +20,59 @@ JIRA_TICKETS_ARRAY=()
 declare -A environments
 environments=([dev]=1 [uat]=2 [pre-prod]=3 [prod]=4)
 
+PREV_DEPLOYMENT_FOUND=false
+
+# pagination parameters for vercel rest api
+MAX_LIMIT=100
+UNTIL_TIMESTAMP=
+
+echo "[]" > list_of_deployments.json
+
 # since vercel creates github deployment objects under "Preview" environment for dev, uat and pre-prod
 # instead of getting deployment objects from github, query vercel deployment objects for a branch (dev, uat, pre-prod or main)
-curl -X GET "https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&teamId=${VERCEL_TEAM_ID}&app=${APP}&state=READY&limit=100" \
-    -H "Authorization: Bearer ${GRID_VERCEL_TOKEN}" \
-    | jq -c "[.deployments[] | select(.meta.githubCommitRef == \"${DEPLOYED_BRANCH}\")]" > list_of_deployments.json
+# iterate over the paginated list of deployment objects from vercel rest api until we find the currently deployed and previous deployed commit hash
+while [[ $PREV_DEPLOYMENT_FOUND != true ]]; do
 
-# cleanup deployment json to remove escape characters if any
-sed -i 's/\\n/ /g' list_of_deployments.json
-sed -i 's/ //g' list_of_deployments.json
+    # get the paginated list of deployments from vercel
+    URL="https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&teamId=${VERCEL_TEAM_ID}&app=${APP}&state=READY&limit=${MAX_LIMIT}"
+    
+    if [ -n "$UNTIL_TIMESTAMP" ]; then
+        URL="${URL}&until=${UNTIL_TIMESTAMP}"
+    fi
 
-# extract the previous deployed commit sha
+    # store the curretly fetched list of deployment in a temporary file
+    curl -X GET "${URL}" -H "Authorization: Bearer ${GRID_VERCEL_TOKEN}" | jq '.deployments' > list_of_deployments_tmp.json
+
+    # extract the timestamp of last object in the list of deployments required for next set of paginated results
+    UNTIL_TIMESTAMP=$(cat list_of_deployments_tmp.json | jq ".[-1].createdAt")
+
+    # filter the list of deployments that relates to the DEPLOYED_BRANCH and append the list to list_of_deployments.json
+    jq -c "[.[] | select(.meta.githubCommitRef == \"${DEPLOYED_BRANCH}\")]" list_of_deployments_tmp.json > list_of_deployments_filtered.json
+    jq -s '.[0] + .[1]' list_of_deployments.json list_of_deployments_filtered.json > combined_deployments.json
+    mv combined_deployments.json list_of_deployments.json
+
+    if [[ $(jq 'length' list_of_deployments.json) == 0 ]]; then
+        continue
+    fi
+
+    # check if the currently deployed object exist in the list of deployment
+    current_deployment_index=$(cat list_of_deployments.json | jq "map(.meta.githubCommitSha==\"$DEPLOYED_SHA\") | index(true)")
+
+    if [[ $current_deployment_index != null ]]; then
+        # previously deployed index is the next deployment object in the list
+        ((previous_deployment_index=current_deployment_index+1))
+
+        # get previously deployed commit hash
+        previous_deployment_sha=$(cat list_of_deployments.json | jq -c ".[$previous_deployment_index].meta.githubCommitSha" | tr -d \")
+        
+        if [[ $previous_deployment_sha != null ]]; then
+            # break out of the loop
+            PREV_DEPLOYMENT_FOUND=true
+        fi
+    fi    
+done
+
+# extract jira tickets between commits previous_deployment_sha and DEPLOYED_SHA
 
 current_deployment_index=$(cat list_of_deployments.json \
     | jq "map(.meta.githubCommitSha==\"$DEPLOYED_SHA\") | index(true)")
