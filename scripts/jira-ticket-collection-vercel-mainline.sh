@@ -162,9 +162,6 @@ for issue_id in "${jira_refs_list_unique[@]}"; do
 
     if [[ "$(echo $issue_api_response | jq 'has("errorMessages")')" == "true" ]]; then
         echo "Issue do not exist: $issue_id; $issue_api_response"
-    elif [[ "$(echo $issue_api_response | jq '.fields.project.key' | tr -d \")" != "DIG" ]]; then
-        echo "Issue do not exist in Digital project - $issue_id"
-        echo "issue belongs to project: $(echo $issue_api_response | jq '.fields.project')"
     elif [[ "$env_in_jira" != "null" ]] && [ ${environments[$ENV]} -lt ${environments[$env_in_jira]} ]; then
         echo "will not override $issue_id to lower environment from $env_in_jira to $ENV"
     else
