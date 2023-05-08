@@ -20,7 +20,7 @@ for ref in "${JIRA_REF_LIST_ARRAY[@]}"; do
 PROJECT_ID="${ref%%-*}"
 
 COMPONENT_ID=$(curl --request GET \
-    --url 'https://autorama.atlassian.net/rest/api/2/project/$PROJECT_ID/components' \
+    --url "https://autorama.atlassian.net/rest/api/2/project/$PROJECT_ID/components" \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
     --header 'Accept: application/json' \
         | jq "[ .[] | select(.name == \"${APP}\") ]" \
