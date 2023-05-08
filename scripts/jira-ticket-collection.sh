@@ -44,7 +44,7 @@ for str in ${JIRA_PROJECTS_IDS[@]}; do
         -H "Authorization: token $GITHUB_PAT" \
         "$GITHUB_API_URL/compare/$PREVIOUS_TAG_SHORT_SHA...$ARTIFACT_TAG_SHORT_SHA" \
         | jq '.commits' | jq '.[].commit.message' | tr -d \" | cut -d'\' -f1 \
-        | grep -P '(?i)$str[-\s][\d]+' -o | grep -P '[\d]+' -o)) || true
+        | grep -P "(?i)$str[-\s][\d]+" -o | grep -P '[\d]+' -o)) || true
 
     for jira_ticket_number in "${JIRA_TICKET_NUMBERS[@]}"; do
         JIRA_TICKETS_ARRAY+=("$str-$jira_ticket_number")
