@@ -11,9 +11,13 @@
 declare -A environments
 environments=([dev]=1 [uat]=2 [pre-prod]=3 [prod]=4)
 
+JIRA_PROJECTS_IDS=("DIG" "PD")
+
 # extract jira tickets from branch name
 
-JIRA_TICKET_NUMBERS=($(echo ${DEPLOYED_BRANCH} | grep -P '(?i)DIG[-\s][\d]+' -o))
+for str in ${JIRA_PROJECTS_IDS[@]}; do
+    JIRA_TICKET_NUMBERS=($(echo ${DEPLOYED_BRANCH} | grep -P '(?i)$str[-\s][\d]+' -o))
+done
 jira_refs_list_unique=($(printf '%s\n' "${JIRA_TICKET_NUMBERS[@]}" | sort -u))
 
 # filter non-existing jira tickets
