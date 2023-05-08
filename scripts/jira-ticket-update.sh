@@ -13,16 +13,20 @@ set -x
 JIRA_REF_LIST_ARRAY=($(echo $JIRA_REF_LIST))
 RELEASE_DATE=$(date +'%Y-%m-%d')
 
+
+
+for ref in "${JIRA_REF_LIST_ARRAY[@]}"; do
+
+PROJECT_ID="${ref%%-*}"
+
 COMPONENT_ID=$(curl --request GET \
-    --url 'https://autorama.atlassian.net/rest/api/2/project/DIG/components' \
+    --url 'https://autorama.atlassian.net/rest/api/2/project/$PROJECT_ID/components' \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
     --header 'Accept: application/json' \
         | jq "[ .[] | select(.name == \"${APP}\") ]" \
         | jq '.[0].id' \
         | tr -d \")
-
-for ref in "${JIRA_REF_LIST_ARRAY[@]}"; do
-
+        
 curl -s \
     --url "https://autorama.atlassian.net/rest/api/3/issue/${ref}" \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
