@@ -16,7 +16,7 @@ JIRA_PROJECTS_IDS=("DIG" "PD")
 # extract jira tickets from branch name
 
 for str in ${JIRA_PROJECTS_IDS[@]}; do
-    JIRA_TICKET_NUMBERS=($(echo ${DEPLOYED_BRANCH} | grep -P '(?i)$str[-\s][\d]+' -o))
+    JIRA_TICKET_NUMBERS=($(echo ${DEPLOYED_BRANCH} | grep -P "(?i)$str[-\s][\d]+" -o))
 done
 jira_refs_list_unique=($(printf '%s\n' "${JIRA_TICKET_NUMBERS[@]}" | sort -u))
 
