@@ -137,7 +137,7 @@ done
 for str in ${JIRA_PROJECTS_IDS[@]}; do
 
     JIRA_TICKET_NUMBERS=($(jq '.' list_of_commits.json | jq '.[].commit.message' | tr -d \" | cut -d'\' -f1 \
-        | grep -P '(?i)$str[-\s][\d]+' -o | grep -P '[\d]+' -o)) || true
+        | grep -P "(?i)$str[-\s][\d]+" -o | grep -P '[\d]+' -o)) || true
 
     for jira_ticket_number in "${JIRA_TICKET_NUMBERS[@]}"; do
         JIRA_TICKETS_ARRAY+=("$str-$jira_ticket_number")
