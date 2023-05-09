@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 # Environment Variables as Input:
 #   $APP - app/repository name
 #   $ENV - environment

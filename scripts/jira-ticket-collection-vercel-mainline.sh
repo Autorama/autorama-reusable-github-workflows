@@ -141,6 +141,7 @@ for str in ${JIRA_PROJECTS_IDS[@]}; do
 
     for jira_ticket_number in "${JIRA_TICKET_NUMBERS[@]}"; do
         JIRA_TICKETS_ARRAY+=("$str-$jira_ticket_number")
+    done
 done
 
 jira_refs_list_unique=($(printf '%s\n' "${JIRA_TICKETS_ARRAY[@]}" | sort -u))

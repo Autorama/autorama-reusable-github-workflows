@@ -11,13 +11,12 @@
 declare -A environments
 environments=([dev]=1 [uat]=2 [pre-prod]=3 [prod]=4)
 
-JIRA_PROJECTS_IDS=("DIG" "PD")
+# we can have multiple jira project ids with separator: '|'
+JIRA_PROJECTS_IDS="DIG|PD"
 
 # extract jira tickets from branch name
 
-for str in ${JIRA_PROJECTS_IDS[@]}; do
-    JIRA_TICKET_NUMBERS=($(echo ${DEPLOYED_BRANCH} | grep -P '(?i)'$str'[-\s][\d]+' -o))
-done
+JIRA_TICKET_NUMBERS=($(echo ${DEPLOYED_BRANCH} | grep -P '(?i)('$JIRA_PROJECTS_IDS')[-\s][\d]+' -o))
 jira_refs_list_unique=($(printf '%s\n' "${JIRA_TICKET_NUMBERS[@]}" | sort -u))
 
 # filter non-existing jira tickets
