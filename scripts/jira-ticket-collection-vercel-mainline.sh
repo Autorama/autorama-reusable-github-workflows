@@ -17,6 +17,8 @@
 
 JIRA_TICKETS_ARRAY=()
 
+JIRA_PROJECTS_IDS=("DIG" "PD")
+
 declare -A environments
 environments=([dev]=1 [uat]=2 [pre-prod]=3 [prod]=4)
 
@@ -132,11 +134,14 @@ while true; do
 
 done
 
-JIRA_TICKET_NUMBERS=($(jq '.' list_of_commits.json | jq '.[].commit.message' | tr -d \" | cut -d'\' -f1 \
-    | grep -P '(?i)DIG[-\s][\d]+' -o | grep -P '[\d]+' -o)) || true
+for str in ${JIRA_PROJECTS_IDS[@]}; do
 
-for jira_ticket_number in "${JIRA_TICKET_NUMBERS[@]}"; do
-    JIRA_TICKETS_ARRAY+=("DIG-$jira_ticket_number")
+    JIRA_TICKET_NUMBERS=($(jq '.' list_of_commits.json | jq '.[].commit.message' | tr -d \" | cut -d'\' -f1 \
+        | grep -P '(?i)'$str'[-\s][\d]+' -o | grep -P '[\d]+' -o)) || true
+
+    for jira_ticket_number in "${JIRA_TICKET_NUMBERS[@]}"; do
+        JIRA_TICKETS_ARRAY+=("$str-$jira_ticket_number")
+    done
 done
 
 jira_refs_list_unique=($(printf '%s\n' "${JIRA_TICKETS_ARRAY[@]}" | sort -u))
@@ -162,9 +167,6 @@ for issue_id in "${jira_refs_list_unique[@]}"; do
 
     if [[ "$(echo $issue_api_response | jq 'has("errorMessages")')" == "true" ]]; then
         echo "Issue do not exist: $issue_id; $issue_api_response"
-    elif [[ "$(echo $issue_api_response | jq '.fields.project.key' | tr -d \")" != "DIG" ]]; then
-        echo "Issue do not exist in Digital project - $issue_id"
-        echo "issue belongs to project: $(echo $issue_api_response | jq '.fields.project')"
     elif [[ "$env_in_jira" != "null" ]] && [ ${environments[$ENV]} -lt ${environments[$env_in_jira]} ]; then
         echo "will not override $issue_id to lower environment from $env_in_jira to $ENV"
     else

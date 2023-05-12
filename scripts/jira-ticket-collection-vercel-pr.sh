@@ -11,9 +11,12 @@
 declare -A environments
 environments=([dev]=1 [uat]=2 [pre-prod]=3 [prod]=4)
 
+# we can have multiple jira project ids with separator: '|'
+JIRA_PROJECTS_IDS="DIG|PD"
+
 # extract jira tickets from branch name
 
-JIRA_TICKET_NUMBERS=($(echo ${DEPLOYED_BRANCH} | grep -P '(?i)DIG[-\s][\d]+' -o))
+JIRA_TICKET_NUMBERS=($(echo ${DEPLOYED_BRANCH} | grep -P '(?i)('$JIRA_PROJECTS_IDS')[-\s][\d]+' -o))
 jira_refs_list_unique=($(printf '%s\n' "${JIRA_TICKET_NUMBERS[@]}" | sort -u))
 
 # filter non-existing jira tickets
@@ -37,9 +40,6 @@ for issue_id in "${jira_refs_list_unique[@]}"; do
 
     if [[ "$(echo $issue_api_response | jq 'has("errorMessages")')" == "true" ]]; then
         echo "Issue do not exist: $issue_id; $issue_api_response"
-    elif [[ "$(echo $issue_api_response | jq '.fields.project.key' | tr -d \")" != "DIG" ]]; then
-        echo "Issue do not exist in Digital project - $issue_id"
-        echo "issue belongs to project: $(echo $issue_api_response | jq '.fields.project')"
     elif [[ "$env_in_jira" != "null" ]] && [ ${environments[$ENV]} -lt ${environments[$env_in_jira]} ]; then
         echo "will not override $issue_id to lower environment from $env_in_jira to $ENV"
     else
