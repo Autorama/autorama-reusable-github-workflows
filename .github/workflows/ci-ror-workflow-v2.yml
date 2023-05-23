@@ -24,8 +24,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Pull build-env-var script
         run: |
-          echo $ENV
-          echo $APP
+          echo "$ENV"
+          echo "$APP"
           curl https://build-env-var.s3.eu-west-2.amazonaws.com/build-env-var.linux-amd64 --output build-env-var.linux-amd64
           chmod +x build-env-var.linux-amd64
           if [[ -e "./build-env-var.linux-amd64" ]]; then
