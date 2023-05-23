@@ -26,6 +26,34 @@ jobs:
         run: |
           curl https://build-env-var.s3.eu-west-2.amazonaws.com/build-env-var.linux-amd64 --output build-env-var.linux-amd64
           chmod +x build-env-var.linux-amd64
+          if [[ -e "./build-env-var.linux-amd64" ]]; then
+          eval "$(./build-env-var.linux-amd64 -ssmPrefix=/$ENV/grid/$APP -pathLookup -envStdout)"
+          fi
+
+          curl \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token $GIT_TOKEN" \
+          https://api.github.com/repos/Autorama/autorama-app-config/contents/env/$APP/.env.$ENVFILE?ref=master \
+          > .tmp_curl
+          response=$?
+          if test "$response" != "0"; then
+          	echo "the curl command failed with: $response"
+          	exit 1
+          else
+              message="$(cat .tmp_curl | jq -r '.message')"
+              echo "Here's message"
+              echo $message
+          	if [[ $message == "Bad credentials" ]] || [[ $message == "Not Found" ]]; then
+          		echo "Error message"
+          		echo $message
+          		echo 'exiting'
+          		exit 1
+          	fi
+          	cat .tmp_curl | jq -r ".content" | base64 --decode > .env
+          	echo "suceeded"
+          fi
+
+          source .env
       - name: Run Unit Test
         run: |
           docker-compose -f docker-compose.ci.yml -p 123 build \
