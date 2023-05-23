@@ -14,8 +14,7 @@ on:
         required: false
         default: false
     secrets:
-      grid_git_token:
-        required: false
+      grid_git_token: ${{ secrets.GRID_GIT_TOKEN }}
 
 jobs:
   unit-test:
