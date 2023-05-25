@@ -26,6 +26,8 @@ jobs:
         run: |
           curl https://build-env-var.s3.eu-west-2.amazonaws.com/build-env-var.linux-amd64 --output build-env-var.linux-amd64
           chmod +x build-env-var.linux-amd64
+          $ENV = {{ inputs.env }}
+          echo $ENV
           if [[ -e "./build-env-var.linux-amd64" ]]; then
           eval "$(./build-env-var.linux-amd64 -ssmPrefix=/$ENV/grid/$APP -pathLookup -envStdout)"
           else
