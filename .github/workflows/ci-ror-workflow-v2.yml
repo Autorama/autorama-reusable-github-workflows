@@ -7,19 +7,12 @@ on:
         description: "the environment"
         type: string
         required: true
-      aws_region:
-        description: "aws region"
-        type: string
-        required: true
       skip_artefact_caching:
         description: "set to true if there are no unit-test artefacts"
         type: boolean
         required: false
         default: false
       app:
-        type: string
-        required: true
-      stack:
         type: string
         required: true
     secrets:
@@ -48,13 +41,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Pull build-env-var script
+      - name: Pull .env file
         run: |
-          curl https://build-env-var.s3.eu-west-2.amazonaws.com/build-env-var.linux-amd64 --output build-env-var.linux-amd64
-          chmod +x build-env-var.linux-amd64
           ENV=${{ inputs.env }}
-          AWS_REGION=${{ inputs.aws_region }}
-          STACK=${{ inputs.stack }}
 
           curl \
           -H "Accept: application/vnd.github.v3+json" \
