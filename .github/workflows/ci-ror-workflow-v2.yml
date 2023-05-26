@@ -18,25 +18,8 @@ on:
     secrets:
       git_token:
         required: true
-      aws_role:
-        required: true
 
 jobs:
-  init:
-    runs-on: ubuntu-latest
-    # These permissions are required to use Github OIDC.
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      # Uses OIDC to assume the role in AWS rather than maintaining AWS credentials
-      # in Github. There is a corresponding OIDC provider in IAM setup to receive tokens
-      # from Github. See https://github.com/aws-actions/configure-aws-credentials#assuming-a-role
-      - uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-region: ${{ inputs.aws_region }}
-          role-to-assume: ${{ secrets.aws_role }}
   unit-test:
     runs-on: ubuntu-latest
     steps:
