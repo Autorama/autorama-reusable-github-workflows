@@ -26,8 +26,7 @@ jobs:
         run: |
           curl https://build-env-var.s3.eu-west-2.amazonaws.com/build-env-var.linux-amd64 --output build-env-var.linux-amd64
           chmod +x build-env-var.linux-amd64
-          ENV = ${{ inputs.env }}
-          echo $ENV
+          ENV=${{ inputs.env }}
           if [[ -e "./build-env-var.linux-amd64" ]]; then
           eval "$(./build-env-var.linux-amd64 -ssmPrefix=/$ENV/grid/$APP -pathLookup -envStdout)"
           else
@@ -37,7 +36,7 @@ jobs:
           curl \
           -H "Accept: application/vnd.github.v3+json" \
           -H "Authorization: token $GIT_TOKEN" \
-          https://api.github.com/repos/Autorama/autorama-app-config/contents/env/$APP/.env.$ENVFILE?ref=master \
+          https://api.github.com/repos/Autorama/autorama-app-config/contents/env/$APP/.env.ci?ref=master \
           > .tmp_curl
           response=$?
           if test "$response" != "0"; then
