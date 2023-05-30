@@ -6,26 +6,54 @@ on:
       env:
         description: "the environment"
         type: string
-        default: "dev"
         required: true
       skip_artefact_caching:
         description: "set to true if there are no unit-test artefacts"
         type: boolean
         required: false
         default: false
+      app:
+        type: string
+        required: true
     secrets:
-      grid_git_token:
-        required: false
+      git_token:
+        required: true
 
 jobs:
   unit-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Pull .env file
+        run: |
+          curl \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token ${{secrets.git_token}} " \
+          https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{inputs.app}}/.env.ci?ref=feature/update-db-url-from-.env.ci-on-cusotmers \
+          > .tmp_curl
+          response=$?
+          if test "$response" != "0"; then
+          	echo "the curl command failed with: $response"
+          	exit 1
+          else
+              message="$(cat .tmp_curl | jq -r '.message')"
+              echo "Here's message"
+              echo $message
+          	if [[ $message == "Bad credentials" ]] || [[ $message == "Not Found" ]]; then
+          		echo "Error message"
+          		echo $message
+          		echo 'exiting'
+          		exit 1
+          	fi
+          	cat .tmp_curl | jq -r ".content" | base64 --decode > .env
+          	echo "suceeded"
+          fi
+
+          source .env
       - name: Run Unit Test
         run: |
           docker-compose -f docker-compose.ci.yml -p 123 build \
-            --build-arg ENV=${{ inputs.env }} --build-arg GIT_TOKEN=${{ secrets.grid_git_token }} \
+            --build-arg ENV=${{ inputs.env }} --build-arg GIT_TOKEN=${{ secrets.git_token }} \
             --build-arg CI=true web
           docker-compose -f docker-compose.ci.yml -p 123 run -u $(id -u) \
             -e HOME=/tmp -e RAILS_ENV=test web \
