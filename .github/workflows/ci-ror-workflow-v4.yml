@@ -29,7 +29,8 @@ jobs:
           curl \
           -H "Accept: application/vnd.github.v3+json" \
           -H "Authorization: token ${{secrets.git_token}} " \
-          https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{inputs.app}}/.env.ci?ref=feature/update-db-url-from-.env.ci-on-cusotmers \
+          https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{inputs.app}}/.env.ci?ref=master \
+
           > .tmp_curl
           response=$?
           if test "$response" != "0"; then
