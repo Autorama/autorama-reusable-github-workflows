@@ -81,10 +81,20 @@ cat <<EOF
 EOF
 }
 
-curl --location --request PUT "https://autorama.atlassian.net/rest/api/3/issue/$ref" \
+
+response_code=$(curl --location --request PUT "https://autorama.atlassian.net/rest/api/3/issue/$ref" \
     --header "Accept: application/json" \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
     --header 'Content-Type: application/json' \
-    --data-raw "$(jira_payload)"
+    --data-raw "$(jira_payload)" \
+    -s -o /dev/null \
+    -w "%{http_code}")
+
+if [[ $response_code != 2* ]]; then
+    echo "Error: Non-200 response received. HTTP status code: $response_code"
+    exit 1
+fi
 
 done
+
+
