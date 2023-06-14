@@ -1,0 +1,99 @@
+name: ci-workflow
+
+env:
+  BUILD_ENV_EXEC_S3_PATH: https://build-env-var.s3.eu-west-2.amazonaws.com/build-env-var.linux-amd64
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        type: string
+        required: true
+      app:
+        type: string
+        required: true
+      stack:
+        type: string
+        required: true
+      ecr_region:
+        type: string
+        required: true
+      run_yarn_lint:
+        type: boolean
+        required: false
+        default: true
+      skip_artefact_caching:
+        description: 'set to true if there are no unit-test artefacts'
+        type: boolean
+        required: false
+        default: false
+    secrets:
+      aws_actions_role:
+        required: true
+      grid_git_token:
+        required: false
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:
+      # this makes the babel-jest-react magic happen and means all tests pass. If this is set to 
+      # development then some tests will fail.
+      NODE_ENV: "test"
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ inputs.ecr_region }}
+          role-to-assume: ${{ secrets.aws_actions_role }}
+      - uses: aws-actions/amazon-ecr-login@v1
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18.14.2'
+          architecture: 'x64'
+      - name: Curl build-env-var
+        run: |
+          curl ${{ env.BUILD_ENV_EXEC_S3_PATH }} --output build-env-var.linux-amd64
+          chmod +x build-env-var.linux-amd64
+      - run: |
+          dot_env_file_api_url="https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{ inputs.app }}/.env.${{ inputs.env }}?ref=master"
+
+          # check if file exist
+          HTTP_STATUS=$(curl -I \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.grid_git_token }}" \
+            "$dot_env_file_api_url" \
+            | head -n 1 | cut -d$' ' -f2)
+
+          if [[ "$HTTP_STATUS" == "200" ]]; then
+            eval "$(./build-env-var.linux-amd64 -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -pathLookup -envStdout)"
+
+            curl \
+              -H "Accept: application/vnd.github.v3+json" \
+              -H "Authorization: token ${{ secrets.grid_git_token }}" \
+              "$dot_env_file_api_url" \
+              | jq -r ".content" | base64 --decode > .env
+          
+            source .env
+          else
+            eval "$(./build-env-var.linux-amd64 -ignoreMissing -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envTemplate=env.template -envStdout)"
+          fi
+
+          export NODE_ENV='development'
+          
+          yarn install
+          
+          if [[ "${{inputs.run_yarn_lint }}" == "true" ]]; then
+            yarn lint
+          fi
+          
+          yarn test
+      - name: Cache unit-test coverage
+        if: ${{ inputs.skip_artefact_caching != true }}
+        uses: actions/cache@v2
+        with:
+          path: coverage
+          key: unit-test-coverage-${{ github.run_number }}
