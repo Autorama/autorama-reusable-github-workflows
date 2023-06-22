@@ -22,8 +22,6 @@ JIRA_PROJECTS_IDS=("DIG" "PD")
 declare -A environments
 environments=([dev]=1 [uat]=2 [pre-prod]=3 [prod]=4)
 
-PREV_DEPLOYMENT_FOUND=false
-
 # pagination parameters for vercel rest api
 MAX_LIMIT=100
 UNTIL_TIMESTAMP=
@@ -33,7 +31,7 @@ echo "[]" > list_of_deployments.json
 # since vercel creates github deployment objects under "Preview" environment for dev, uat and pre-prod
 # instead of getting deployment objects from github, query vercel deployment objects for a branch (dev, uat, pre-prod or main)
 # iterate over the paginated list of deployment objects from vercel rest api until we find the currently deployed and previous deployed commit hash
-while [[ $PREV_DEPLOYMENT_FOUND != true ]]; do
+while true; do
 
     # get the paginated list of deployments from vercel
     URL="https://api.vercel.com/v6/deployments?projectId=${VERCEL_PROJECT_ID}&teamId=${VERCEL_TEAM_ID}&app=${APP}&state=READY&limit=${MAX_LIMIT}"
@@ -68,8 +66,7 @@ while [[ $PREV_DEPLOYMENT_FOUND != true ]]; do
         previous_deployment_sha=$(cat list_of_deployments.json | jq -c ".[$previous_deployment_index].meta.githubCommitSha" | tr -d \")
         
         if [[ $previous_deployment_sha != null ]]; then
-            # break out of the loop
-            PREV_DEPLOYMENT_FOUND=true
+            break
         fi
     fi    
 done
@@ -87,6 +84,7 @@ previous_deployment_sha=$(cat list_of_deployments.json | jq -c ".[$previous_depl
 echo Comparing $previous_deployment_sha...$DEPLOYED_SHA
 
 found_current_deployment_index=false
+echo "[]" > list_of_commits_tmp.json
 echo "[]" > list_of_commits.json
 page_number=1
 
@@ -136,10 +134,21 @@ done
 
 for str in ${JIRA_PROJECTS_IDS[@]}; do
 
-    JIRA_TICKET_NUMBERS=($(jq '.' list_of_commits.json | jq '.[].commit.message' | tr -d \" | cut -d'\' -f1 \
+    JIRA_TICKET_NUMBERS_FROM_BRANCH=($(jq '.' list_of_commits.json | jq '.[].commit.message' | tr -d \" | cut -d'\' -f1 \
         | grep -P '(?i)'$str'[-\s][\d]+' -o | grep -P '[\d]+' -o)) || true
 
-    for jira_ticket_number in "${JIRA_TICKET_NUMBERS[@]}"; do
+    for jira_ticket_number in "${JIRA_TICKET_NUMBERS_FROM_BRANCH[@]}"; do
+        JIRA_TICKETS_ARRAY+=("$str-$jira_ticket_number")
+    done
+
+    JIRA_TICKET_NUMBERS_FROM_COMPARE=($(curl -s \
+        -H "Accept: application/vnd.github.v3+json" \
+        -H "Authorization: token ${GITHUB_PAT}" \
+        "${GITHUB_API_URL}/compare/$previous_deployment_sha...$DEPLOYED_SHA" \
+        | jq '.commits' | jq '.[].commit.message' | tr -d \" | cut -d'\' -f1 \
+        | grep -P '(?i)'$str'[-\s][\d]+' -o | grep -P '[\d]+' -o)) || true
+    
+    for jira_ticket_number in "${JIRA_TICKET_NUMBERS_FROM_COMPARE[@]}"; do
         JIRA_TICKETS_ARRAY+=("$str-$jira_ticket_number")
     done
 done
@@ -176,4 +185,5 @@ done
 
 
 # export output variables
+echo "Jira tickets fetched: ${JIRA_TICKETS_STRING}"
 export JIRA_TICKETS_STRING=${jira_refs_to_update[*]}
