@@ -29,7 +29,7 @@ jobs:
           curl \
           -H "Accept: application/vnd.github.v3+json" \
           -H "Authorization: token ${{secrets.git_token}}" \
-          https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{inputs.app}}/.env.ci?ref=feature/DIG-11912-orders-env-ci-fix-v2 \
+          https://api.github.com/repos/Autorama/autorama-app-config/contents/env/${{inputs.app}}/.env.ci?ref=feature/orders-ci-fix \
           > .tmp_curl
           response=$?
           if test "$response" != "0"; then
