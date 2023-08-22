@@ -23,7 +23,7 @@ on:
         required: false
         default: true
       skip_artefact_caching:
-        description: 'set to true if there are no unit-test artefacts'
+        description: "set to true if there are no unit-test artefacts"
         type: boolean
         required: false
         default: false
@@ -37,7 +37,7 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     env:
-      # this makes the babel-jest-react magic happen and means all tests pass. If this is set to 
+      # this makes the babel-jest-react magic happen and means all tests pass. If this is set to
       # development then some tests will fail.
       NODE_ENV: "test"
     permissions:
@@ -45,15 +45,17 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v3
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: ${{ inputs.ecr_region }}
           role-to-assume: ${{ secrets.aws_actions_role }}
       - uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: true
       - uses: actions/setup-node@v2
         with:
-          node-version: '14.17.0'
-          architecture: 'x64'
+          node-version: "14.17.0"
+          architecture: "x64"
       - name: Curl build-env-var
         run: |
           curl ${{ env.BUILD_ENV_EXEC_S3_PATH }} --output build-env-var.linux-amd64
@@ -76,20 +78,20 @@ jobs:
               -H "Authorization: token ${{ secrets.grid_git_token }}" \
               "$dot_env_file_api_url" \
               | jq -r ".content" | base64 --decode > .env
-          
+
             source .env
           else
             eval "$(./build-env-var.linux-amd64 -ignoreMissing -ssmPrefix=/${{ inputs.env }}/${{ inputs.stack }}/${{ inputs.app }} -envTemplate=env.template -envStdout)"
           fi
 
           export NODE_ENV='development'
-          
+
           yarn install
-          
+
           if [[ "${{inputs.run_yarn_lint }}" == "true" ]]; then
             yarn lint
           fi
-          
+
           yarn test
       - name: Cache unit-test coverage
         if: ${{ inputs.skip_artefact_caching != true }}

@@ -64,7 +64,7 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.6.5
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: ${{ inputs.aws_region }}
           role-to-assume: ${{ secrets.aws_role }}
