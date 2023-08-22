@@ -50,6 +50,8 @@ jobs:
           aws-region: ${{ inputs.ecr_region }}
           role-to-assume: ${{ secrets.aws_actions_role }}
       - uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: true
       - uses: actions/setup-node@v3
         with:
           node-version: '18.14.2'
