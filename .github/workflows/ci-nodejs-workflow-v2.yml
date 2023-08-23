@@ -95,7 +95,7 @@ jobs:
           yarn test
       - name: Cache unit-test coverage
         if: ${{ inputs.skip_artefact_caching != true }}
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: coverage
           key: unit-test-coverage-${{ github.run_number }}
