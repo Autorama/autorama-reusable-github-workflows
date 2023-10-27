@@ -45,11 +45,11 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v3
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ inputs.ecr_region }}
           role-to-assume: ${{ secrets.aws_actions_role }}
-      - uses: aws-actions/amazon-ecr-login@v1
+      - uses: aws-actions/amazon-ecr-login@v2
       - uses: actions/setup-node@v2
         with:
           node-version: '14.17.0'
