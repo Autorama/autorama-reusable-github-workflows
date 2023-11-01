@@ -68,17 +68,17 @@ jobs:
       
       # setup aws credentials for uat to pull the ecr image
       
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ inputs.ecr_region }}
           role-to-assume: ${{ secrets.grid_uat_gha_action_role }}
-      - uses: aws-actions/amazon-ecr-login@v1
+      - uses: aws-actions/amazon-ecr-login@v2
       - name: Pull latest develop image for cache
         run: docker pull ${{ secrets.grid_prod_repo_prefix }}/${{ env.APP }}:latest || true
 
       # setup aws credentials for input env to pull the ssm parameters and run docker build
 
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ inputs.ecr_region }}
           role-to-assume: ${{ secrets.grid_env_gha_action_role }}
@@ -86,7 +86,7 @@ jobs:
         run: |
           curl ${{ inputs.build_env_exec_s3_path }} --output build-env-var.linux-amd64
           chmod +x build-env-var.linux-amd64
-      - uses: aws-actions/amazon-ecr-login@v1
+      - uses: aws-actions/amazon-ecr-login@v2
       - name: Pull latest develop image for cache
         run: docker pull ${{ secrets.grid_prod_repo_prefix }}/${{ env.APP }}:latest || true
       - name: Docker build
@@ -119,11 +119,11 @@ jobs:
 
       # setup aws credentials for uat to push ecr image
 
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ inputs.ecr_region }}
           role-to-assume: ${{ secrets.grid_uat_gha_action_role }}
-      - uses: aws-actions/amazon-ecr-login@v1
+      - uses: aws-actions/amazon-ecr-login@v2
       - name: Docker push
         run: |
           ARTEFACT_TAG=${{ inputs.tag }}

@@ -56,7 +56,7 @@ jobs:
       - uses: nanasess/setup-chromedriver@v1
         with:
           chromedriver-version: '104.0.5112.79'
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ inputs.aws_region }}
           role-to-assume: ${{ secrets.aws_role }}
