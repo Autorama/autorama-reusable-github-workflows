@@ -7,6 +7,10 @@ on:
         type: string
         required: true
         description: watchman repository following the format - {org}/{repo}
+      env:
+        type: string
+        required: true
+        description: environment. eg. dev|uat|prod
       aws_region:
         type: string
         required: true
@@ -30,9 +34,9 @@ on:
         required: true
 
 jobs:
-  devPlan:
+  terraformPlan:
     runs-on: ubuntu-latest
-    name: Create Terraform plan for dev environment
+    name: "Create Terraform plan for ${{ inputs.env }} environment"
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -43,51 +47,9 @@ jobs:
       with:
         role-to-assume: ${{ secrets.role_to_assume }}
         aws-region: ${{ inputs.aws_region }}
-    - name: dev terraform plan
+    - name: "${{ inputs.env }} terraform plan"
       uses: dflook/terraform-plan@v1
       with:
         path: ${{ inputs.terraform_path }}
         var_file: ${{ inputs.terraform_var_file }}
         backend_config_file: ${{ inputs.terraform_backend_config_file }}
-
-  uatPlan:
-    runs-on: ubuntu-latest
-    name: Create Terraform plan for uat environment
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ inputs.git_branch_sha }}
-    - uses: aws-actions/configure-aws-credentials@v4
-      # Exchanges the OIDC token (JWT) for a cloud access token.
-      with:
-        role-to-assume: ${{ secrets.role_to_assume }}
-        aws-region: ${{ inputs.aws_region }}
-    - name: uat terraform plan
-      uses: dflook/terraform-plan@v1
-      with:
-        path: ${{ inputs.terraform_path }}
-        var_file: ${{ inputs.terraform_var_file }}
-        backend_config_file: ${{ inputs.terraform_backend_config_file }}
-
-  prodPlan:
-    runs-on: ubuntu-latest
-    name: Create Terraform plan for prod environment
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ inputs.git_branch_sha }}
-    - uses: aws-actions/configure-aws-credentials@v4
-      # Exchanges the OIDC token (JWT) for a cloud access token.
-      with:
-        role-to-assume: ${{ secrets.role_to_assume }}
-        aws-region: ${{ inputs.aws_region }}
-    - name: prod terraform plan
-      uses: dflook/terraform-plan@v1
-      with:
-        path: ${{ inputs.terraform_path }}
-        var_file: ${{ inputs.terraform_var_file }}
-        backend_config_file: ${{ inputs.terraform_backend_config_file }}
-
-
