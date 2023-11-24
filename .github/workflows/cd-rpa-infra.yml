@@ -1,0 +1,93 @@
+name: cd-rpa-infra
+
+on:
+  workflow_call:
+    inputs:
+      git_branch_sha:
+        type: string
+        required: true
+        description: watchman repository following the format - {org}/{repo}
+      aws_region:
+        type: string
+        required: true
+        description: aws region
+      terraform_path:
+        type: string
+        required: true
+        description: path to terraform folder
+      terraform_var_file:
+        type: string
+        required: true
+        description: path to terraform vars
+      terraform_backend_config_file:
+        type: string
+        required: true
+        description: path to terraform backend configuration
+    secrets:
+      git_token:
+        required: true
+      role_to_assume:
+        required: true
+
+jobs:
+  devPlan:
+    runs-on: ubuntu-latest
+    name: Create Terraform plan for dev environment
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.git_branch_sha }}
+    - uses: aws-actions/configure-aws-credentials@v4
+      # Exchanges the OIDC token (JWT) for a cloud access token.
+      with:
+        role-to-assume: ${{ secrets.role_to_assume }}
+        aws-region: ${{ inputs.aws_region }}
+    - name: dev terraform plan
+      uses: dflook/terraform-plan@v1
+      with:
+        path: ${{ inputs.terraform_path }}
+        var_file: ${{ inputs.terraform_var_file }}
+        backend_config_file: ${{ inputs.terraform_backend_config_file }}
+
+  uatPlan:
+    runs-on: ubuntu-latest
+    name: Create Terraform plan for uat environment
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.git_branch_sha }}
+    - uses: aws-actions/configure-aws-credentials@v4
+      # Exchanges the OIDC token (JWT) for a cloud access token.
+      with:
+        role-to-assume: ${{ secrets.role_to_assume }}
+        aws-region: ${{ inputs.aws_region }}
+    - name: uat terraform plan
+      uses: dflook/terraform-plan@v1
+      with:
+        path: ${{ inputs.terraform_path }}
+        var_file: ${{ inputs.terraform_var_file }}
+        backend_config_file: ${{ inputs.terraform_backend_config_file }}
+
+  prodPlan:
+    runs-on: ubuntu-latest
+    name: Create Terraform plan for prod environment
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.git_branch_sha }}
+    - uses: aws-actions/configure-aws-credentials@v4
+      # Exchanges the OIDC token (JWT) for a cloud access token.
+      with:
+        role-to-assume: ${{ secrets.role_to_assume }}
+        aws-region: ${{ inputs.aws_region }}
+    - name: prod terraform plan
+      uses: dflook/terraform-plan@v1
+      with:
+        path: ${{ inputs.terraform_path }}
+        var_file: ${{ inputs.terraform_var_file }}
+        backend_config_file: ${{ inputs.terraform_backend_config_file }}
+
+
