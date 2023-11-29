@@ -36,22 +36,52 @@ on:
         required: true
 
 jobs:
-  terraformPlan:
+  review-terraform-plan:
     runs-on: ubuntu-latest
-    name: "Create Terraform plan for ${{ inputs.environment }} environment"
+    name: Run Terraform Plan on Master
+    outputs:
+      tag: ${{ steps.create-tag.outputs.tag }}
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ inputs.git_branch_sha }}
-    - uses: aws-actions/configure-aws-credentials@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: master
+      - uses: aws-actions/configure-aws-credentials@v4
       # Exchanges the OIDC token (JWT) for a cloud access token.
-      with:
-        role-to-assume: ${{ secrets.role_to_assume }}
-        aws-region: ${{ inputs.aws_region }}
-    - name: "${{ inputs.environment }} terraform plan"
-      uses: dflook/terraform-plan@v1
-      with:
-        path: ${{ inputs.terraform_path }}
-        var_file: ${{ inputs.terraform_var_file }}
-        backend_config_file: ${{ inputs.terraform_backend_config_file }}
+        with:
+          role-to-assume: ${{ secrets.role_to_assume }}
+          aws-region: ${{ inputs.aws_region }}
+      - name: "Create Terraform plan for ${{ inputs.environment }} environment"
+        uses: dflook/terraform-plan@v1
+        with:
+          path: ${{ inputs.terraform_path }}
+          var_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-vars.tfvars"
+          backend_config_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-backend.tfvars"
+          add_github_comment: false
+
+  terraform-apply:
+    needs: [ review-terraform-plan ]
+    runs-on: ubuntu-latest
+    name: Run Terraform Apply
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.review-terraform-plan.outputs.tag }}
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.role_to_assume }}
+          aws-region: ${{ inputs.aws_region }}
+      - name: "Apply Terraform Plan for ${{ inputs.environment }} environment"
+        uses: dflook/terraform-apply@v1
+        with:
+          path: ${{ inputs.terraform_path }}
+          var_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-vars.tfvars"
+          backend_config_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-backend.tfvars"
+          auto_approve: true
