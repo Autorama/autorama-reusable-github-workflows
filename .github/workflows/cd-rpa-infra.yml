@@ -19,14 +19,6 @@ on:
         type: string
         required: true
         description: path to terraform folder
-      terraform_var_file:
-        type: string
-        required: true
-        description: path to terraform vars
-      terraform_backend_config_file:
-        type: string
-        required: true
-        description: path to terraform backend configuration
     secrets:
       git_token:
         required: true
