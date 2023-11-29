@@ -63,17 +63,8 @@ jobs:
     needs: [ review-terraform-plan ]
     runs-on: ubuntu-latest
     name: Run Terraform Apply
-    environment: dev
+    environment: ${{ inputs.environment }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: master
-      - name: Create Release
-        uses: ncipollo/release-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.review-terraform-plan.outputs.tag }}
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.role_to_assume }}
