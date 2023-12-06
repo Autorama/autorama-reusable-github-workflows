@@ -20,13 +20,16 @@ on:
         required: true
         description: path to terraform folder
     secrets:
-      git_token:
-        required: true
       role_to_assume:
         required: true
       terraform_http_credentials:
         required: true
 
+env:
+  # This is required by dflook/terraform-plan@v1, so tf modules can be fetched.
+  TERRAFORM_HTTP_CREDENTIALS: |
+      github.com/Autorama/autorama-infra-modules.git=autorama-jenkins:${{ secrets.GHA_TF_ACTION_PAT }}
+  
 jobs:
   review-terraform-plan:
     runs-on: ubuntu-latest
