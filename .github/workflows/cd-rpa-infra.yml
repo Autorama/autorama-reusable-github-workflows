@@ -40,7 +40,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: ${{ inputs.git_branch-sha }}
       - uses: aws-actions/configure-aws-credentials@v4
       # Exchanges the OIDC token (JWT) for a cloud access token.
         with:
