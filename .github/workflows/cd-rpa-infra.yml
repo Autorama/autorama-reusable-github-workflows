@@ -22,8 +22,6 @@ on:
     secrets:
       role_to_assume:
         required: true
-      terraform_http_credentials:
-        required: true
 
 env:
   # This is required by dflook/terraform-plan@v1, so tf modules can be fetched.
