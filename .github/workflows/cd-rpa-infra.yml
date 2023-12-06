@@ -29,6 +29,8 @@ env:
   # This is required by dflook/terraform-plan@v1, so tf modules can be fetched.
   TERRAFORM_HTTP_CREDENTIALS: |
       github.com/Autorama/autorama-infra-modules.git=autorama-jenkins:${{ secrets.GHA_TF_ACTION_PAT }}
+      
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
 jobs:
   review-terraform-plan:
@@ -40,7 +42,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.git_branch-sha }}
+          ref: ${{ inputs.git_branch_sha }}
       - uses: aws-actions/configure-aws-credentials@v4
       # Exchanges the OIDC token (JWT) for a cloud access token.
         with:
