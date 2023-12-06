@@ -22,7 +22,7 @@ on:
     secrets:
       role_to_assume:
         required: true
-      terraform_credentials:
+      terraform_http_credentials:
         required: true
 
 permissions:
@@ -31,7 +31,7 @@ permissions:
 
 env:
   # This is required by dflook/terraform-plan@v1, so tf modules can be fetched.
-  TERRAFORM_HTTP_CREDENTIALS: ${{secrets.terraform_credentials}}
+  TERRAFORM_HTTP_CREDENTIALS: ${{secrets.terraform_http_credentials}}
   
 jobs:
   review-terraform-plan:
