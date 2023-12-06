@@ -25,11 +25,15 @@ on:
       terraform_http_credentials:
         required: true
 
+permissions:
+  id-token: write # OIDC token generated in the reusable workflow can be accessed from context of dflook/terraform-plan@v1
+  contents: write # enables permission for release creation
+
 env:
   # This is required by dflook/terraform-plan@v1, so tf modules can be fetched.
   TERRAFORM_HTTP_CREDENTIALS: |
       github.com/Autorama/autorama-infra-modules.git=autorama-jenkins:${{ secrets.GHA_TF_ACTION_PAT }}
-      
+
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
 jobs:
@@ -43,6 +47,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.git_branch_sha }}
+      - name: Checkout autorama-rpa-infra repo
+        uses: actions/checkout@v4
+        with:
+          repository: Autorama/autorama-rpa-infra
+          path: autorama-rpa-infra
       - uses: aws-actions/configure-aws-credentials@v4
       # Exchanges the OIDC token (JWT) for a cloud access token.
         with:
