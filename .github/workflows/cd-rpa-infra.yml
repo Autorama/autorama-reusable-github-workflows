@@ -25,10 +25,6 @@ on:
       terraform_http_credentials:
         required: true
 
-permissions:
-  id-token: write # OIDC token generated in the reusable workflow can be accessed from context of dflook/terraform-plan@v1
-  contents: write # enables permission for release creation
-
 env:
   # This is required by dflook/terraform-plan@v1, so tf modules can be fetched.
   TERRAFORM_HTTP_CREDENTIALS: |
