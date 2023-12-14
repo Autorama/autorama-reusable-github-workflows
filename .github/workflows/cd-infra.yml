@@ -1,4 +1,4 @@
-name: cd-rpa-infra
+name: cd-infra
 
 on:
   workflow_call:
@@ -55,7 +55,7 @@ jobs:
           path: ${{ inputs.terraform_path }}
           var_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-vars.tfvars"
           backend_config_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-backend.tfvars"
-          add_github_comment: false
+          add_github_comment: true
 
   terraform-apply:
     needs: [ review-terraform-plan ]
