@@ -1,0 +1,94 @@
+name: cd-tf-executor
+
+on:
+  workflow_call:
+    inputs:
+      git_branch_sha:
+        type: string
+        required: true
+        description: watchman repository following the format - {org}/{repo}
+      environment:
+        type: string
+        required: true
+        description: environment. eg. dev|uat|prod
+      aws_region:
+        type: string
+        required: true
+        description: aws region
+      terraform_path:
+        type: string
+        required: true
+        description: path to terraform folder
+      tf_apply_yn:
+        type: boolean
+        required: true
+        description: if the flag is set then wf will enable tf apply step
+        default: false
+      pull_request_yn:
+        type: boolean
+        required: true
+        description: if the flag is set wf will post the plan on the comments of the pull request
+        default: false
+    secrets:
+      role_to_assume:
+        required: true
+      terraform_http_credentials:
+        required: true
+      git_token:
+        required: false
+
+permissions:
+  id-token: write # OIDC token generated in the reusable workflow can be accessed from context of dflook/terraform-plan@v1
+  contents: read
+
+env:
+  # This is required by dflook/terraform-plan@v1, so tf modules can be fetched.
+  TERRAFORM_HTTP_CREDENTIALS: ${{secrets.terraform_http_credentials}}
+  GITHUB_TOKEN: ${{ secrets.git_token}}
+  
+jobs:
+  terraform-plan:
+    runs-on: ubuntu-latest
+    name: Run Terraform Plan on Master
+    outputs:
+      tag: ${{ steps.create-tag.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_branch_sha }}
+      - uses: aws-actions/configure-aws-credentials@v4
+      # Exchanges the OIDC token (JWT) for a cloud access token.
+        with:
+          role-to-assume: ${{ secrets.role_to_assume }}
+          aws-region: ${{ inputs.aws_region }}
+      - name: "Create Terraform plan for ${{ inputs.environment }} environment"
+        uses: dflook/terraform-plan@v1
+        with:
+          path: ${{ inputs.terraform_path }}
+          var_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-vars.tfvars"
+          backend_config_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-backend.tfvars"
+          add_github_comment: ${{inputs.pull_request_yn}}
+
+  terraform-apply:
+    needs: [ terraform-plan ]
+    runs-on: ubuntu-latest
+    name: Run Terraform Apply
+    environment: ${{ inputs.environment }}
+    if: ${{ inputs.tf_apply_yn == true }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_branch_sha }}
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.role_to_assume }}
+          aws-region: ${{ inputs.aws_region }}
+      - name: "Apply Terraform Plan for ${{ inputs.environment }} environment"
+        uses: dflook/terraform-apply@v1
+        with:
+          path: ${{ inputs.terraform_path }}
+          var_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-vars.tfvars"
+          backend_config_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-backend.tfvars"
+          auto_approve: true
