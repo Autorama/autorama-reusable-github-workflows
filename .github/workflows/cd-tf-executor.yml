@@ -28,6 +28,7 @@ on:
         type: boolean
         required: true
         description: if the flag is set wf will post the plan on the comments of the pull request
+        default: false
     secrets:
       role_to_assume:
         required: true
@@ -74,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Run Terraform Apply
     environment: ${{ inputs.environment }}
-    if: ${{ inputs.tf_apply == true }}
+    if: ${{ inputs.tf_apply_yn == true }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
