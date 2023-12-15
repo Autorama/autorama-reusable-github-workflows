@@ -19,18 +19,22 @@ on:
         type: string
         required: true
         description: path to terraform folder
-      tf_apply:
+      tf_apply_yn:
         type: boolean
         required: true
         description: if the flag is set then wf will enable tf apply step
         default: false
+      pull_request_yn:
+        type: boolean
+        required: true
+        description: if the flag is set wf will post the plan on the comments of the pull request
     secrets:
       role_to_assume:
         required: true
       terraform_http_credentials:
         required: true
       git_token:
-        required: true
+        required: false
 
 permissions:
   id-token: write # OIDC token generated in the reusable workflow can be accessed from context of dflook/terraform-plan@v1
@@ -63,7 +67,7 @@ jobs:
           path: ${{ inputs.terraform_path }}
           var_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-vars.tfvars"
           backend_config_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-backend.tfvars"
-          add_github_comment: true
+          add_github_comment: ${{inputs.pull_request_yn}}
 
   terraform-apply:
     needs: [ terraform-plan ]
