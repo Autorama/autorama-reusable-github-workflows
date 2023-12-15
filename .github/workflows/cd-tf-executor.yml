@@ -1,4 +1,4 @@
-name: cd-infra
+name: cd-tf-executor
 
 on:
   workflow_call:
@@ -19,6 +19,11 @@ on:
         type: string
         required: true
         description: path to terraform folder
+      tf_apply:
+        type: boolean
+        required: true
+        description: if the flag is set then wf will enable tf apply step
+        default: false
     secrets:
       role_to_assume:
         required: true
@@ -34,7 +39,7 @@ env:
   TERRAFORM_HTTP_CREDENTIALS: ${{secrets.terraform_http_credentials}}
   
 jobs:
-  review-terraform-plan:
+  terraform-plan:
     runs-on: ubuntu-latest
     name: Run Terraform Plan on Master
     outputs:
@@ -58,10 +63,11 @@ jobs:
           add_github_comment: false
 
   terraform-apply:
-    needs: [ review-terraform-plan ]
+    needs: [ terraform-plan ]
     runs-on: ubuntu-latest
     name: Run Terraform Apply
     environment: ${{ inputs.environment }}
+    if: ${{ inputs.tf_apply == true }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
