@@ -29,6 +29,8 @@ on:
         required: true
       terraform_http_credentials:
         required: true
+      git_token:
+        required: true
 
 permissions:
   id-token: write # OIDC token generated in the reusable workflow can be accessed from context of dflook/terraform-plan@v1
@@ -37,6 +39,7 @@ permissions:
 env:
   # This is required by dflook/terraform-plan@v1, so tf modules can be fetched.
   TERRAFORM_HTTP_CREDENTIALS: ${{secrets.terraform_http_credentials}}
+  GITHUB_TOKEN: ${{ secrets.git_token}}
   
 jobs:
   terraform-plan:
@@ -60,7 +63,7 @@ jobs:
           path: ${{ inputs.terraform_path }}
           var_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-vars.tfvars"
           backend_config_file: "${{ inputs.terraform_path }}/environments/${{ inputs.environment }}-backend.tfvars"
-          add_github_comment: false
+          add_github_comment: true
 
   terraform-apply:
     needs: [ terraform-plan ]
