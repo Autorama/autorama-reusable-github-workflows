@@ -36,10 +36,10 @@ EXISTING_COMPONENTS_JSON=$(cat jira_issue_response.json \
 EXISTING_BRANCHES_JSON=$(cat jira_issue_response.json \
     | jq -c '.fields.customfield_10147')
 
-# customfield_10133 - Release Date
-# customfield_10132 - Release Environment
-# customfield_10114 - Release Tag
-# customfield_10147 - Branches
+# customfield_11047 - Release Date
+# customfield_11046 - Release Environment
+# customfield_11039 - Release Tag
+# customfield_11054 - Branches
 
 if [[ -z $DEPLOYED_BRANCH ]]; then
     BRANCH_LIST_JSON=$(echo ${EXISTING_BRANCHES_JSON} | jq -c )
@@ -51,8 +51,8 @@ jira_payload() {
 cat <<EOF
 {
     "update": {
-        "customfield_10133": [{"set":"$RELEASE_DATE"}],
-        "customfield_10132": [
+        "customfield_11047": [{"set":"$RELEASE_DATE"}],
+        "customfield_11046": [
             {
                 "set": [
                     {
@@ -61,7 +61,7 @@ cat <<EOF
                 ]
             }
         ],
-        "customfield_10114": [
+        "customfield_11039": [
             {
                 "set": "${ARTIFACT_TAG}"
             }
@@ -71,7 +71,7 @@ cat <<EOF
                 "set": $(echo ${EXISTING_COMPONENTS_JSON} | jq ". |= . + [{\"id\": \"${COMPONENT_ID}\"}]")
             }
         ],
-        "customfield_10147": [
+        "customfield_11054": [
             {
                 "set": $(echo $BRANCH_LIST_JSON)
             }
