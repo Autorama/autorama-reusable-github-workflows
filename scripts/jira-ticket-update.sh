@@ -18,7 +18,7 @@ for ref in "${JIRA_REF_LIST_ARRAY[@]}"; do
 PROJECT_ID="${ref%%-*}"
 
 COMPONENT_ID=$(curl --request GET \
-    --url "https://autorama.atlassian.net/rest/api/2/project/$PROJECT_ID/components" \
+    --url "https://autotrader-sandbox-655.atlassian.net/rest/api/2/project/$PROJECT_ID/components" \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
     --header 'Accept: application/json' \
         | jq "[ .[] | select(.name == \"${APP}\") ]" \
@@ -26,7 +26,7 @@ COMPONENT_ID=$(curl --request GET \
         | tr -d \")
         
 curl -s \
-    --url "https://autorama.atlassian.net/rest/api/3/issue/${ref}" \
+    --url "https://autotrader-sandbox-655.atlassian.net/rest/api/3/issue/${ref}" \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
     --header 'Accept: application/json' > jira_issue_response.json
 
@@ -82,7 +82,7 @@ EOF
 }
 
 
-response_code=$(curl --location --request PUT "https://autorama.atlassian.net/rest/api/3/issue/$ref" \
+response_code=$(curl --location --request PUT "https://autotrader-sandbox-655.atlassian.net/rest/api/3/issue/$ref" \
     --header "Accept: application/json" \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
     --header 'Content-Type: application/json' \

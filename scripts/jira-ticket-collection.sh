@@ -60,12 +60,12 @@ existing_jira_refs=()
 for issue_id in "${jira_refs_list_unique[@]}"; do
 
     issue_api_response=$(curl -s \
-        --url "https://autorama.atlassian.net/rest/api/3/issue/$issue_id" \
+        --url "https://autotrader-sandbox-655.atlassian.net/rest/api/3/issue/$issue_id" \
         --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
         --header 'Accept: application/json')
 
     env_in_jira=$(curl -s \
-        --url "https://autorama.atlassian.net/rest/api/3/issue/$issue_id" \
+        --url "https://autotrader-sandbox-655.atlassian.net/rest/api/3/issue/$issue_id" \
         --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
         --header 'Accept: application/json' \
             | jq '.fields.customfield_10132[0].value' \
