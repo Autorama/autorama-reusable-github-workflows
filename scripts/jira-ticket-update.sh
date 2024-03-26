@@ -52,15 +52,6 @@ cat <<EOF
 {
     "update": {
         "customfield_11047": [{"set":"$RELEASE_DATE"}],
-        "customfield_11046": [
-            {
-                "set": [
-                    {
-                        "value": "${ENV}"
-                    }
-                ]
-            }
-        ],
         "customfield_11039": [
             {
                 "set": "${ARTIFACT_TAG}"
