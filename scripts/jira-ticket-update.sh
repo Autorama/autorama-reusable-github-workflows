@@ -7,18 +7,21 @@
 #   $JIRA_REF_LIST - whitespace separated jira ticket ids
 #   $JIRA_API_TOKEN - Jira API Token
 #   $DEPLOYED_BRANCH - deployed branch
+#   $JIRA_ENDPOINT - Autotrader jira endpoint
+#   $JIRA_CUSTOMFIELD_JSON_STRING  - jira customfields json string
 
 JIRA_REF_LIST_ARRAY=($(echo $JIRA_REF_LIST))
 RELEASE_DATE=$(date +'%Y-%m-%d')
 
-
+# Convert JSON string back to JSON object
+JIRA_CUSTOMFIELD_JSON=$(echo "$JIRA_CUSTOMFIELD_JSON_STRING" | jq '.')
 
 for ref in "${JIRA_REF_LIST_ARRAY[@]}"; do
 
 PROJECT_ID="${ref%%-*}"
 
 COMPONENT_ID=$(curl --request GET \
-    --url "https://autotrader-sandbox-655.atlassian.net/rest/api/2/project/$PROJECT_ID/components" \
+    --url "$JIRA_ENDPOINT/rest/api/2/project/$PROJECT_ID/components" \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
     --header 'Accept: application/json' \
         | jq "[ .[] | select(.name == \"${APP}\") ]" \
@@ -26,7 +29,7 @@ COMPONENT_ID=$(curl --request GET \
         | tr -d \")
         
 curl -s \
-    --url "https://autotrader-sandbox-655.atlassian.net/rest/api/3/issue/${ref}" \
+    --url "$JIRA_ENDPOINT/rest/api/3/issue/${ref}" \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
     --header 'Accept: application/json' > jira_issue_response.json
 
@@ -34,7 +37,7 @@ EXISTING_COMPONENTS_JSON=$(cat jira_issue_response.json \
     | jq -c '.fields.components')
 
 EXISTING_BRANCHES_JSON=$(cat jira_issue_response.json \
-    | jq -c '.fields.customfield_10147')
+    | jq -c '.fields.customfield_11054')
 
 # customfield_11047 - Release Date
 # customfield_11046 - Release Environment
@@ -47,12 +50,27 @@ else
     BRANCH_LIST_JSON=$(echo ${EXISTING_BRANCHES_JSON} | jq -c ". |= . + [\"${DEPLOYED_BRANCH}\"]")
 fi
 
+# Get values using jq
+RELEASE_DATES=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.RELEASE_DATE')
+RELEASE_ENV=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.RELEASE_ENV')
+RELEASE_TAG=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.RELEASE_TAG')
+BRANCH=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.BRANCH')
+
 jira_payload() {
 cat <<EOF
 {
     "update": {
-        "customfield_11047": [{"set":"$RELEASE_DATE"}],
-        "customfield_11039": [
+        "$RELEASE_DATES": [{"set":"$RELEASE_DATE"}],
+        "$RELEASE_ENV": [
+            {
+                "set": [
+                    {
+                        "value": "${ENV}"
+                    }
+                ]
+            }
+        ],
+        "$RELEASE_TAG": [
             {
                 "set": "${ARTIFACT_TAG}"
             }
@@ -62,7 +80,7 @@ cat <<EOF
                 "set": $(echo ${EXISTING_COMPONENTS_JSON} | jq ". |= . + [{\"id\": \"${COMPONENT_ID}\"}]")
             }
         ],
-        "customfield_11054": [
+        "$BRANCH": [
             {
                 "set": $(echo $BRANCH_LIST_JSON)
             }
@@ -73,7 +91,7 @@ EOF
 }
 
 
-response_code=$(curl --location --request PUT "https://autotrader-sandbox-655.atlassian.net/rest/api/3/issue/$ref" \
+response_code=$(curl --location --request PUT "$JIRA_ENDPOINT/rest/api/3/issue/$ref" \
     --header "Accept: application/json" \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
     --header 'Content-Type: application/json' \
@@ -87,5 +105,3 @@ if [[ $response_code != 2* ]]; then
 fi
 
 done
-
-
