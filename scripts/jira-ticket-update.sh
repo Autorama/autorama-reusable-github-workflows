@@ -51,17 +51,17 @@ else
 fi
 
 # Get values using jq
-RELEASE_DATES=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.RELEASE_DATE')
-RELEASE_ENV=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.RELEASE_ENV')
-RELEASE_TAG=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.RELEASE_TAG')
-BRANCH=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.BRANCH')
+RELEASE_DATE_CUSTOMFIELD_ID=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.RELEASE_DATE')
+RELEASE_ENV_CUSTOMFIELD_ID=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.RELEASE_ENV')
+RELEASE_TAG_CUSTOMFIELD_ID=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.RELEASE_TAG')
+BRANCH_CUSTOMFIELD_ID=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.BRANCH')
 
 jira_payload() {
 cat <<EOF
 {
     "update": {
-        "$RELEASE_DATES": [{"set":"$RELEASE_DATE"}],
-        "$RELEASE_ENV": [
+        "$RELEASE_DATE_CUSTOMFIELD_ID": [{"set":"$RELEASE_DATE"}],
+        "$RELEASE_ENV_CUSTOMFIELD_ID": [
             {
                 "set": [
                     {
@@ -70,7 +70,7 @@ cat <<EOF
                 ]
             }
         ],
-        "$RELEASE_TAG": [
+        "$RELEASE_TAG_CUSTOMFIELD_ID": [
             {
                 "set": "${ARTIFACT_TAG}"
             }
@@ -80,7 +80,7 @@ cat <<EOF
                 "set": $(echo ${EXISTING_COMPONENTS_JSON} | jq ". |= . + [{\"id\": \"${COMPONENT_ID}\"}]")
             }
         ],
-        "$BRANCH": [
+        "$BRANCH_CUSTOMFIELD_ID": [
             {
                 "set": $(echo $BRANCH_LIST_JSON)
             }
