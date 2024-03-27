@@ -12,6 +12,8 @@
 # Environment Variables as Output:
 #   $JIRA_TICKETS - string of whitespace separated multiple JIRA tickets (e.g. "DIG-1 DIG-2 DIG-3")
 
+JIRA_ENDPOINT=https://autotrader-sandbox-655.atlassian.net
+
 JIRA_TICKETS_ARRAY=()
 JIRA_PROJECTS_IDS=("DIG" "PD")
 
