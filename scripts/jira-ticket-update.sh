@@ -10,6 +10,9 @@
 #   $JIRA_ENDPOINT - Autotrader jira endpoint
 #   $JIRA_CUSTOMFIELD_JSON_STRING  - jira customfields json string
 
+JIRA_ENDPOINT=https://autotrader-sandbox-655.atlassian.net
+JIRA_CUSTOMFIELD_JSON_STRING='{"RELEASE_DATE":"customfield_11047","RELEASE_ENV":"customfield_11046","RELEASE_TAG":"customfield_11039","BRANCH":"customfield_11054"}'
+
 JIRA_REF_LIST_ARRAY=($(echo $JIRA_REF_LIST))
 RELEASE_DATE=$(date +'%Y-%m-%d')
 
