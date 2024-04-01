@@ -10,8 +10,8 @@
 #   $JIRA_ENDPOINT - Autotrader jira endpoint
 #   $JIRA_CUSTOMFIELD_JSON_STRING  - jira customfields json string
 
-JIRA_ENDPOINT=https://autotrader-sandbox-655.atlassian.net
-JIRA_CUSTOMFIELD_JSON_STRING='{"RELEASE_DATE":"customfield_11047","RELEASE_ENV":"customfield_11046","RELEASE_TAG":"customfield_11039","BRANCH":"customfield_11054"}'
+JIRA_ENDPOINT=https://autotrader.atlassian.net
+JIRA_CUSTOMFIELD_JSON_STRING='{"RELEASE_DATE":"customfield_11116","RELEASE_ENV":"customfield_11115","RELEASE_TAG":"customfield_11108","BRANCH":"customfield_11123"}'
 
 JIRA_REF_LIST_ARRAY=($(echo $JIRA_REF_LIST))
 RELEASE_DATE=$(date +'%Y-%m-%d')
@@ -42,10 +42,10 @@ EXISTING_COMPONENTS_JSON=$(cat jira_issue_response.json \
 EXISTING_BRANCHES_JSON=$(cat jira_issue_response.json \
     | jq -c '.fields.customfield_11054')
 
-# customfield_11047 - Release Date
-# customfield_11046 - Release Environment
-# customfield_11039 - Release Tag
-# customfield_11054 - Branches
+# customfield_11116 - Release Date
+# customfield_11115 - Release Environment(TA)
+# customfield_11108 - Release Tag
+# customfield_11123 - Branches
 
 if [[ -z $DEPLOYED_BRANCH ]]; then
     BRANCH_LIST_JSON=$(echo ${EXISTING_BRANCHES_JSON} | jq -c )
