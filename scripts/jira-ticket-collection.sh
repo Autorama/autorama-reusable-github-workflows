@@ -7,9 +7,12 @@
 #   $ARTIFACT_TAG - github tag used for deployment (release-5488a22)
 #   $GITHUB_PAT - github PAT token
 #   $JIRA_API_TOKEN - Jira API Token
+#   $JIRA_ENDPOINT - Autotrader jira endpoint
 
 # Environment Variables as Output:
 #   $JIRA_TICKETS - string of whitespace separated multiple JIRA tickets (e.g. "DIG-1 DIG-2 DIG-3")
+
+JIRA_ENDPOINT=https://autotrader.atlassian.net
 
 JIRA_TICKETS_ARRAY=()
 JIRA_PROJECTS_IDS=("DIG" "PD")
@@ -60,15 +63,15 @@ existing_jira_refs=()
 for issue_id in "${jira_refs_list_unique[@]}"; do
 
     issue_api_response=$(curl -s \
-        --url "https://autorama.atlassian.net/rest/api/3/issue/$issue_id" \
+        --url "$JIRA_ENDPOINT/rest/api/3/issue/$issue_id" \
         --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
         --header 'Accept: application/json')
 
     env_in_jira=$(curl -s \
-        --url "https://autorama.atlassian.net/rest/api/3/issue/$issue_id" \
+        --url "$JIRA_ENDPOINT/rest/api/3/issue/$issue_id" \
         --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
         --header 'Accept: application/json' \
-            | jq '.fields.customfield_10132[0].value' \
+            | jq '.fields.customfield_11046[0].value' \
             | tr -d \" \
             | tr '[:upper:]' '[:lower:]')
 

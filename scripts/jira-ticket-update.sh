@@ -7,18 +7,24 @@
 #   $JIRA_REF_LIST - whitespace separated jira ticket ids
 #   $JIRA_API_TOKEN - Jira API Token
 #   $DEPLOYED_BRANCH - deployed branch
+#   $JIRA_ENDPOINT - Autotrader jira endpoint
+#   $JIRA_CUSTOMFIELD_JSON_STRING  - jira customfields json string
+
+JIRA_ENDPOINT=https://autotrader.atlassian.net
+JIRA_CUSTOMFIELD_JSON_STRING='{"RELEASE_DATE":"customfield_11116","RELEASE_ENV":"customfield_11115","RELEASE_TAG":"customfield_11108","BRANCH":"customfield_11123"}'
 
 JIRA_REF_LIST_ARRAY=($(echo $JIRA_REF_LIST))
 RELEASE_DATE=$(date +'%Y-%m-%d')
 
-
+# Convert JSON string back to JSON object
+JIRA_CUSTOMFIELD_JSON=$(echo "$JIRA_CUSTOMFIELD_JSON_STRING" | jq '.')
 
 for ref in "${JIRA_REF_LIST_ARRAY[@]}"; do
 
 PROJECT_ID="${ref%%-*}"
 
 COMPONENT_ID=$(curl --request GET \
-    --url "https://autorama.atlassian.net/rest/api/2/project/$PROJECT_ID/components" \
+    --url "$JIRA_ENDPOINT/rest/api/2/project/$PROJECT_ID/components" \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
     --header 'Accept: application/json' \
         | jq "[ .[] | select(.name == \"${APP}\") ]" \
@@ -26,7 +32,7 @@ COMPONENT_ID=$(curl --request GET \
         | tr -d \")
         
 curl -s \
-    --url "https://autorama.atlassian.net/rest/api/3/issue/${ref}" \
+    --url "$JIRA_ENDPOINT/rest/api/3/issue/${ref}" \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
     --header 'Accept: application/json' > jira_issue_response.json
 
@@ -34,12 +40,12 @@ EXISTING_COMPONENTS_JSON=$(cat jira_issue_response.json \
     | jq -c '.fields.components')
 
 EXISTING_BRANCHES_JSON=$(cat jira_issue_response.json \
-    | jq -c '.fields.customfield_10147')
+    | jq -c '.fields.customfield_11054')
 
-# customfield_10133 - Release Date
-# customfield_10132 - Release Environment
-# customfield_10114 - Release Tag
-# customfield_10147 - Branches
+# customfield_11116 - Release Date
+# customfield_11115 - Release Environment(TA)
+# customfield_11108 - Release Tag
+# customfield_11123 - Branches
 
 if [[ -z $DEPLOYED_BRANCH ]]; then
     BRANCH_LIST_JSON=$(echo ${EXISTING_BRANCHES_JSON} | jq -c )
@@ -47,12 +53,18 @@ else
     BRANCH_LIST_JSON=$(echo ${EXISTING_BRANCHES_JSON} | jq -c ". |= . + [\"${DEPLOYED_BRANCH}\"]")
 fi
 
+# Get values using jq
+RELEASE_DATE_CUSTOMFIELD_ID=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.RELEASE_DATE')
+RELEASE_ENV_CUSTOMFIELD_ID=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.RELEASE_ENV')
+RELEASE_TAG_CUSTOMFIELD_ID=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.RELEASE_TAG')
+BRANCH_CUSTOMFIELD_ID=$(echo "$JIRA_CUSTOMFIELD_JSON" | jq -r '.BRANCH')
+
 jira_payload() {
 cat <<EOF
 {
     "update": {
-        "customfield_10133": [{"set":"$RELEASE_DATE"}],
-        "customfield_10132": [
+        "$RELEASE_DATE_CUSTOMFIELD_ID": [{"set":"$RELEASE_DATE"}],
+        "$RELEASE_ENV_CUSTOMFIELD_ID": [
             {
                 "set": [
                     {
@@ -61,7 +73,7 @@ cat <<EOF
                 ]
             }
         ],
-        "customfield_10114": [
+        "$RELEASE_TAG_CUSTOMFIELD_ID": [
             {
                 "set": "${ARTIFACT_TAG}"
             }
@@ -71,7 +83,7 @@ cat <<EOF
                 "set": $(echo ${EXISTING_COMPONENTS_JSON} | jq ". |= . + [{\"id\": \"${COMPONENT_ID}\"}]")
             }
         ],
-        "customfield_10147": [
+        "$BRANCH_CUSTOMFIELD_ID": [
             {
                 "set": $(echo $BRANCH_LIST_JSON)
             }
@@ -82,7 +94,7 @@ EOF
 }
 
 
-response_code=$(curl --location --request PUT "https://autorama.atlassian.net/rest/api/3/issue/$ref" \
+response_code=$(curl --location --request PUT "$JIRA_ENDPOINT/rest/api/3/issue/$ref" \
     --header "Accept: application/json" \
     --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
     --header 'Content-Type: application/json' \
@@ -96,5 +108,3 @@ if [[ $response_code != 2* ]]; then
 fi
 
 done
-
-
