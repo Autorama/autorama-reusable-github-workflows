@@ -40,7 +40,7 @@ EXISTING_COMPONENTS_JSON=$(cat jira_issue_response.json \
     | jq -c '.fields.components')
 
 EXISTING_BRANCHES_JSON=$(cat jira_issue_response.json \
-    | jq -c '.fields.customfield_11054')
+    | jq -c '.fields.customfield_11123')
 
 # customfield_11116 - Release Date
 # customfield_11115 - Release Environment(TA)

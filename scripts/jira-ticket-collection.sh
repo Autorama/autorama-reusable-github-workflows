@@ -71,7 +71,7 @@ for issue_id in "${jira_refs_list_unique[@]}"; do
         --url "$JIRA_ENDPOINT/rest/api/3/issue/$issue_id" \
         --user "devops@vanarama.co.uk:${JIRA_API_TOKEN}" \
         --header 'Accept: application/json' \
-            | jq '.fields.customfield_11046[0].value' \
+            | jq '.fields.customfield_11115[0].value' \
             | tr -d \" \
             | tr '[:upper:]' '[:lower:]')
 
