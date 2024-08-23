@@ -21,15 +21,9 @@ on:
 
 jobs:
   unit-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - name: Install Docker Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
-          
       - name: Pull .env file
         run: |
           curl \
@@ -58,10 +52,10 @@ jobs:
           source .env
       - name: Run Unit Test
         run: |
-          docker-compose -f docker-compose.ci.yml -p 123 build \
+          docker compose -f docker-compose.ci.yml -p 123 build \
             --build-arg ENV=${{ inputs.env }} --build-arg GIT_TOKEN=${{ secrets.git_token }} \
             --build-arg CI=true web
-          docker-compose -f docker-compose.ci.yml -p 123 run -u $(id -u) \
+          docker compose -f docker-compose.ci.yml -p 123 run -u $(id -u) \
             -e HOME=/tmp -e RAILS_ENV=test web \
             bundle exec rspec --format RspecJunitFormatter --out results.xml \
             --format progress --format documentation
