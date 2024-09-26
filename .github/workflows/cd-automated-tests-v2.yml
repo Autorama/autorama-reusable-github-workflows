@@ -123,7 +123,7 @@ jobs:
     needs: [run-test-pack]
     outputs:
       tag: ${{ steps.variables.outputs.report_urls }}
-    if: always()
+    if: always() && !cancelled()
     steps:
       - name: set variables
         id: variables
